@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Adicionar Questões</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+    .form-card {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 12px rgba(25, 118, 210, 0.07);
+        padding: 32px 28px 24px 28px;
+        margin-bottom: 24px;
+        margin-top: 18px;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .form-card h2 {
+        color: #1976d2;
+        margin-bottom: 18px;
+        font-size: 1.5em;
+    }
+    .form-group {
+        margin-bottom: 18px;
+    }
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 4px;
+        display: block;
+    }
+    .alternativas-list {
+        margin-bottom: 18px;
+    }
+    .alternativa-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+    .alternativa-item input[type="text"] {
+        flex: 1;
+        margin-bottom: 0;
+    }
+    .alternativa-item .correta-label {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 1em;
+        margin-bottom: 0;
+    }
+    .alternativa-item button {
+        margin-left: 0;
+        background: #d32f2f;
+        color: #fff;
+        border: none;
+        border-radius: 3px;
+        padding: 4px 12px;
+        cursor: pointer;
+        font-size: 0.98em;
+        transition: background 0.2s;
+    }
+    .alternativa-item button:hover { background: #a31515; }
+    #preview-imagem { max-width: 200px; margin: 8px 0; display: none; border: 1px solid #bcdffb; border-radius: 4px; }
+    .btn-full {
+        width: 100%;
+        margin-top: 10px;
+        margin-bottom: 8px;
+        font-size: 1.08em;
+        font-weight: 500;
+        display: block;
+        box-sizing: border-box;
+    }
+    .btn-finalizar {
+        width: 100%;
+        margin-top: 10px;
+        margin-bottom: 0;
+        font-size: 1.08em;
+        font-weight: 500;
+        display: block;
+        box-sizing: border-box;
+        text-align: center;
+    }
+    .btn-finalizar span {
+        display: inline-block;
+        width: 100%;
+        text-align: center;
+    }
+    .questoes-list {
+        margin-top: 28px;
+    }
+    .questoes-list h3 {
+        color: #1976d2;
+        margin-bottom: 10px;
+    }
+    .questao-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+    .questao-item .excluir-btn {
+        background: #d32f2f;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 4px 16px;
+        font-size: 0.98em;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .questao-item .excluir-btn:hover { background: #a31515; }
+    /* Estilização do input file */
+    .file-input-wrapper {
+        position: relative;
+        width: 100%;
+        margin-top: 4px;
+    }
+    .file-input-wrapper input[type=file] {
+        opacity: 0;
+        width: 100%;
+        height: 40px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        cursor: pointer;
+        z-index: 2;
+    }
+    .file-input-label {
+        display: inline-block;
+        background: #1976d2;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 22px;
+        font-size: 1em;
+        font-weight: 500;
+        cursor: pointer;
+        text-align: center;
+        transition: background 0.2s;
+        z-index: 1;
+    }
+    .file-input-label:hover {
+        background: #125ea7;
+    }
+    .file-chosen {
+        margin-left: 12px;
+        color: #1976d2;
+        font-size: 0.98em;
+    }
+    </style>
+    <!-- CKEditor CDN -->
+    <script src="https://cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
+    <script>
+    function addAlternativa() {
+        var container = document.getElementById('alternativas');
+        var idx = container.children.length;
+        var div = document.createElement('div');
+        div.className = 'alternativa-item';
+        div.innerHTML = '<input type="text" name="alternativa" required placeholder="Alternativa">' +
+            '<label class="correta-label"><input type="checkbox" name="correta" value="'+idx+'"> Correta</label>' +
+            '<button type="button" onclick="removerAlternativa(this)">Excluir</button>';
+        container.appendChild(div);
+    }
+    function removerAlternativa(btn) {
+        btn.parentNode.remove();
+    }
+    function previewImagem(input) {
+        var preview = document.getElementById('preview-imagem');
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.src = '';
+            preview.style.display = 'none';
+        }
+        // Atualiza nome do arquivo
+        var fileNameSpan = document.getElementById('file-chosen');
+        if (input.files && input.files.length > 0) {
+            fileNameSpan.textContent = input.files[0].name;
+        } else {
+            fileNameSpan.textContent = 'Nenhum arquivo escolhido';
+        }
+    }
+    function previewSuporteImagem(input) {
+        var preview = document.getElementById('suporte-preview-imagem');
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.src = '';
+            preview.style.display = 'none';
+        }
+        // Atualiza nome do arquivo
+        var fileNameSpan = document.getElementById('suporte-file-chosen');
+        if (input.files && input.files.length > 0) {
+            fileNameSpan.textContent = input.files[0].name;
+        } else {
+            fileNameSpan.textContent = 'Nenhum arquivo escolhido';
+        }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      CKEDITOR.replace('suporte_texto', {
+        height: 250,
+        removePlugins: 'elementspath',
+        resize_enabled: false,
+        extraPlugins: 'justify',
+        toolbar: [
+          [ 'Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo' ],
+          [ 'Bold', 'Italic', 'Underline', 'Strike', '-', 'Subscript', 'Superscript' ],
+          [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote' ],
+          [ 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock' ],
+          [ 'Link', 'Unlink', 'Image', 'Table' ],
+          [ 'Format', 'Font', 'FontSize', 'TextColor', 'BGColor' ],
+          [ 'RemoveFormat', 'Source' ]
+        ]
+      });
+    });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="form-card">
+            <h2>Adicionar Questão</h2>
+            <form method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Enunciado:</label>
+                    <textarea name="enunciado" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Suporte (texto opcional):</label>
+                    <textarea name="suporte_texto" id="suporte_texto" placeholder="Digite o texto de apoio, se houver"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Suporte (imagem opcional):</label>
+                    <div class="file-input-wrapper">
+                        <label class="file-input-label">Escolher Arquivo
+                            <input type="file" name="suporte_imagem" accept="image/*" onchange="previewSuporteImagem(this)">
+                        </label>
+                        <span class="file-chosen" id="suporte-file-chosen">Nenhum arquivo escolhido</span>
+                    </div>
+                    <img id="suporte-preview-imagem" alt="Prévia da imagem de suporte" style="display:none; max-width:200px; margin-top:8px; border:1px solid #bcdffb; border-radius:4px;" />
+                </div>
+                <div class="form-group">
+                    <label>Comando:</label>
+                    <input type="text" name="comando" placeholder="Ex: Assinale a alternativa correta" required>
+                </div>
+                <div class="form-group">
+                    <label>Valor da Questão:</label>
+                    <input type="number" name="valor" step="0.01" min="0" required>
+                </div>
+                <div class="form-group alternativas-list">
+                    <label>Alternativas:</label>
+                    <div id="alternativas">
+                        <div class="alternativa-item">
+                            <input type="text" name="alternativa" required placeholder="Alternativa">
+                            <label class="correta-label"><input type="checkbox" name="correta" value="0"> Correta</label>
+                            <button type="button" onclick="removerAlternativa(this)">Excluir</button>
+                        </div>
+                        <div class="alternativa-item">
+                            <input type="text" name="alternativa" required placeholder="Alternativa">
+                            <label class="correta-label"><input type="checkbox" name="correta" value="1"> Correta</label>
+                            <button type="button" onclick="removerAlternativa(this)">Excluir</button>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addAlternativa()" class="btn btn-full">+ Adicionar Alternativa</button>
+                </div>
+                <button type="submit" class="btn btn-full">Adicionar Questão</button>
+                <a href="/gerar_link/{{ avaliacao_id }}" class="btn btn-finalizar"><span>Finalizar Avaliação e Gerar Link</span></a>
+            </form>
+        </div>
+        <div class="questoes-list">
+            <h3 style="color:#1976d2;">Questões já adicionadas:</h3>
+            <ul style="padding-left:0;">
+                {% for q in questoes %}
+                    <li class="questao-item">
+                        <span style="flex:1;">{{ q['enunciado'] }} (Valor: {{ q['valor'] }})</span>
+                        <form method="POST" action="/excluir_questao/{{ q['id'] }}/{{ avaliacao_id }}" style="display:inline;">
+                            <button type="submit" class="excluir-btn" onclick="return confirm('Tem certeza que deseja excluir esta questão?')">Excluir</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li>Nenhuma questão adicionada ainda.</li>
+                {% endfor %}
+            </ul>
+            <a href="/visualizar_avaliacao/{{ avaliacao_id }}" class="btn btn-full" style="margin:18px auto 0 auto; background:#1976d2; color:#fff; display:block; max-width:100%; width:100%; text-align:center;">Visualizar</a>
+        </div>
+    </div>
+</body>
+</html> 

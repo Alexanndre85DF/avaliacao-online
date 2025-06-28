@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastrar Professor</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+    .cadastro-container {
+        max-width: 400px;
+        margin: 48px auto;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 16px rgba(25, 118, 210, 0.09);
+        padding: 36px 32px 28px 32px;
+        text-align: center;
+    }
+    .cadastro-container h2 {
+        color: #1976d2;
+        margin-bottom: 18px;
+    }
+    .cadastro-container label {
+        display: block;
+        text-align: left;
+        margin-bottom: 4px;
+        font-weight: 500;
+    }
+    .cadastro-container input[type="text"],
+    .cadastro-container input[type="email"],
+    .cadastro-container input[type="password"] {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 16px;
+        border: 1px solid #bcdffb;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    .cadastro-container button {
+        background: #1976d2;
+        color: #fff;
+        border: none;
+        padding: 10px 22px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1em;
+        margin-top: 8px;
+        width: 100%;
+    }
+    .cadastro-container button:hover {
+        background: #125ea7;
+    }
+    .cadastro-container .voltar-link {
+        display: block;
+        margin-top: 18px;
+        color: #1976d2;
+        text-decoration: underline;
+        font-size: 1em;
+    }
+    .flash {
+        color: #d32f2f;
+        margin-bottom: 12px;
+    }
+    </style>
+</head>
+<body>
+    <div class="cadastro-container">
+        <h2>Cadastrar Professor</h2>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul class="flash">
+              {% for message in messages %}
+                <li>{{ message }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+        <form method="POST">
+            <label>Nome:</label>
+            <input type="text" name="nome" required>
+            <label>Email:</label>
+            <input type="email" name="email" required>
+            <label>Senha:</label>
+            <input type="password" name="senha" required>
+            <button type="submit">Cadastrar</button>
+        </form>
+        <a href="/" class="voltar-link">Voltar para o login</a>
+    </div>
+</body>
+</html> 

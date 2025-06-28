@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>TesteOn</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+    .titulo-testeon {
+        font-size: 3em;
+        font-weight: bold;
+        color: #1976d2;
+        letter-spacing: 2px;
+        text-shadow: 1px 2px 8px #bcdffb;
+        margin-bottom: 0.2em;
+    }
+    .slogan {
+        text-align: center;
+        font-size: 1.25em;
+        color: #333;
+        margin-bottom: 2.2em;
+        font-weight: 400;
+    }
+    .login-container {
+        margin-top: 1.5em;
+    }
+    .descricao-plataforma {
+        text-align: center;
+        color: #6a7680;
+        font-size: 1.08em;
+        margin: 32px 0 0 0;
+    }
+    .rodape-institucional {
+        margin: 16px auto 0 auto;
+        text-align: center;
+        color: #6a7680;
+        font-size: 0.98em;
+        max-width: 420px;
+        padding: 0 10px;
+        line-height: 1.5em;
+    }
+    .form-login {
+        max-width:350px;
+        margin:0 auto;
+    }
+    .form-login button {
+        display: block;
+        margin: 18px auto 0 auto;
+    }
+    .btn-cadastrar-prof {
+        display: block;
+        margin: 18px auto 0 auto;
+        background: #1976d2;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 22px;
+        font-size: 1em;
+        font-weight: 500;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        transition: background 0.2s;
+        width: 100%;
+        max-width: 350px;
+    }
+    .btn-cadastrar-prof:hover {
+        background: #125ea7;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="/static/uploads/testeon.png" alt="Logo TesteOn" style="display:block; margin: 0 auto 18px auto; max-width:260px; height:auto;">
+        <div style="text-align:center; font-size:1.25em; color:#1976d2; margin-bottom:18px; font-weight:500;">Sua avaliação conectada ao futuro.</div>
+        <div class="login-container">
+            <h2 style="text-align:center; color:#1976d2;">Login do Professor</h2>
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <ul class="flash">
+                  {% for message in messages %}
+                    <li>{{ message }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}
+            <form method="POST">
+                <label for="email">E-mail ou CPF:</label>
+                <input type="text" id="email" name="email" required><br>
+                <label for="senha">Senha:</label>
+                <input type="password" id="senha" name="senha" required><br>
+                <button type="submit" class="btn">Entrar</button>
+            </form>
+            <div style="margin-top:18px; text-align:center;">
+                <b>Professor padrão:</b> prof@escola.com | Senha: 1234
+            </div>
+        </div>
+        <div class="descricao-plataforma">
+            Plataforma para o professor criar simulados e aplicar virtualmente para seus estudantes.
+        </div>
+        <div class="rodape-institucional">
+            Criado por Alexandre Tolentino @2025
+        </div>
+    </div>
+</body>
+</html> 

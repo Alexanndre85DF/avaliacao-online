@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Nova Avaliação</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+    .form-card {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 12px rgba(25, 118, 210, 0.07);
+        padding: 32px 28px 24px 28px;
+        margin-bottom: 24px;
+        margin-top: 18px;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .form-card h2 {
+        color: #1976d2;
+        margin-bottom: 18px;
+        font-size: 1.5em;
+    }
+    .form-group {
+        margin-bottom: 18px;
+    }
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 4px;
+        display: block;
+    }
+    .btn-full {
+        width: 100%;
+        margin-top: 10px;
+        font-size: 1.08em;
+        font-weight: 500;
+        display: block;
+        box-sizing: border-box;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-card">
+            <h2>Criar Nova Avaliação</h2>
+            <form method="POST">
+                <div class="form-group">
+                    <label>Título da Avaliação:</label>
+                    <input type="text" name="titulo" required>
+                </div>
+                <button type="submit" class="btn btn-full">Salvar e Adicionar Questões</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html> 
