@@ -25,8 +25,10 @@
     </style>
     <script>
     function copiarLink() {
-        var link = document.getElementById('link').innerText;
-        navigator.clipboard.writeText(link);
+        var linkInput = document.getElementById('link');
+        linkInput.select();
+        linkInput.setSelectionRange(0, 99999); // Para dispositivos móveis
+        document.execCommand('copy');
         alert('Link copiado!');
     }
     </script>
@@ -34,7 +36,7 @@
 <body>
     <div class="container">
         <h2 style="color:#1976d2;">Link para Responder a Avaliação</h2>
-        <p id="link">{{ link }}</p>
+        <input id="link" value="{{ link }}" readonly style="width:100%;text-align:center;font-size:1.1em;">
         <button onclick="copiarLink()" class="btn">Copiar Link</button>
         <a href="/dashboard/{{ professor_id }}" class="btn-voltar">Voltar</a>
         <p>Envie este link para seus alunos responderem a avaliação.</p>
