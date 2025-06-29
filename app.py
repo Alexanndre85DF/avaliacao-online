@@ -405,6 +405,11 @@ def visualizar_avaliacao(avaliacao_id):
     conn.close()
     return render_template('visualizar_avaliacao.html', avaliacao=avaliacao, questoes=questoes_com_alternativas, avaliacao_id=avaliacao_id)
 
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+
 @app.route('/grafico_resultado/<int:avaliacao_id>')
 def grafico_resultado(avaliacao_id):
     conn = get_db()
