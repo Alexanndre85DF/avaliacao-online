@@ -435,6 +435,31 @@ def grafico_resultado(avaliacao_id):
     conn.close()
     return render_template('grafico_resultado.html', avaliacao_id=avaliacao_id, nomes=nomes, pontuacoes=pontuacoes)
 
+@app.route('/analise_questoes/<int:avaliacao_id>')
+def analise_questoes(avaliacao_id):
+    conn = get_db()
+    cur = conn.cursor()
+    # Buscar todas as questões da avaliação
+    cur.execute('SELECT * FROM questao WHERE avaliacao_id = ?', (avaliacao_id,))
+    questoes = cur.fetchall()
+    questoes_analise = []
+    for questao in questoes:
+        cur.execute('SELECT * FROM alternativa WHERE questao_id = ?', (questao['id'],))
+        alternativas = cur.fetchall()
+        alternativas_dados = []
+        total_respostas = 0
+        for alt in alternativas:
+            cur.execute('SELECT COUNT(*) as total FROM resposta_questao WHERE questao_id = ? AND alternativa_id = ?', (questao['id'], alt['id']))
+            count = cur.fetchone()['total']
+            alternativas_dados.append({'id': alt['id'], 'texto': alt['texto'], 'total': count})
+            total_respostas += count
+        # Calcular porcentagem
+        for alt in alternativas_dados:
+            alt['porcentagem'] = (alt['total'] / total_respostas * 100) if total_respostas > 0 else 0
+        questoes_analise.append({'questao': questao, 'alternativas': alternativas_dados})
+    conn.close()
+    return render_template('analise_questoes.html', questoes_analise=questoes_analise, avaliacao_id=avaliacao_id)
+
 if __name__ == '__main__':
     init_db()
     app.run(host='0.0.0.0', port=10000)
