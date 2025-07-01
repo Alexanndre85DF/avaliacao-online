@@ -29,6 +29,7 @@ def get_db():
     return conn
 
 
+
 # Atualizar função init_db para sintaxe PostgreSQL
 # Trocar AUTOINCREMENT por SERIAL, BOOLEAN por BOOLEAN DEFAULT FALSE, etc.
 def init_db():
