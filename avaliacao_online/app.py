@@ -22,8 +22,7 @@ PG_PASSWORD = os.environ.get('PG_PASSWORD', 'postgres')
 PG_PORT = os.environ.get('PG_PORT', '5432')
 
 # Nova função para conectar ao PostgreSQL
-def get_db():
-    import os
+def get_db():   
     import psycopg2
 
     DATABASE_URL = os.getenv("DATABASE_URL")
