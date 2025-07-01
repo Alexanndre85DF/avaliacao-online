@@ -22,17 +22,12 @@ PG_PASSWORD = os.environ.get('PG_PASSWORD', 'postgres')
 PG_PORT = os.environ.get('PG_PORT', '5432')
 
 # Nova função para conectar ao PostgreSQL
-def get_db():
-    conn = psycopg2.connect(
-    host=PG_HOST,
-    database=PG_DB,
-    user=PG_USER,
-    password=PG_PASSWORD,
-    port=PG_PORT,
-    sslmode='require'  # ✅ Adiciona segurança exigida pelo Render
-)
+ddef get_db():
+    dsn = f"dbname='{PG_DB}' user='{PG_USER}' password='{PG_PASSWORD}' host='{PG_HOST}' port='{PG_PORT}' sslmode='require'"
+    conn = psycopg2.connect(dsn)
     conn.autocommit = True
     return conn
+
 
 # Atualizar função init_db para sintaxe PostgreSQL
 # Trocar AUTOINCREMENT por SERIAL, BOOLEAN por BOOLEAN DEFAULT FALSE, etc.
