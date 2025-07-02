@@ -15,11 +15,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Configuração do PostgreSQL via variáveis de ambiente
-PG_HOST = os.environ.get('PG_HOST', 'localhost')
-PG_DB = os.environ.get('PG_DB', 'prova_saeb')
-PG_USER = os.environ.get('PG_USER', 'postgres')
-PG_PASSWORD = os.environ.get('PG_PASSWORD', 'postgres')
-PG_PORT = os.environ.get('PG_PORT', '5432')
 
 # Nova função para conectar ao PostgreSQL
 def get_db():   
