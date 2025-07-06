@@ -131,7 +131,7 @@ else:
 
 
 # Dashboard do professor
-@app.route('/dashboard/<int:professor_id>')
+@app.route('/dashboard/<int:professor_id>') 
 def dashboard(professor_id):
     conn = get_db()
     cur = conn.cursor()
