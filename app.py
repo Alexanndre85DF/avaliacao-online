@@ -115,7 +115,7 @@ def index():
         cur = conn.cursor()
         cur.execute('SELECT * FROM professor WHERE email = %s AND senha = %s', (email, senha))
         prof = cur.fetchone()
-conn.close()
+        conn.close()
 
     if prof:
         session['professor_id'] = prof[0]
