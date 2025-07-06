@@ -116,19 +116,19 @@ def index():
         cur = conn.cursor()
         cur.execute('SELECT * FROM professor WHERE email = %s AND senha = %s', (email, senha))
         prof = cur.fetchone()
-        conn.close()
-        if prof:
-            session['professor_id'] = prof['id']
-            session['professor_email'] = prof['email']
-            # Se for admin, marca na sessão
-            if prof['email'] == '01099080150' and prof['senha'] == 'brasilia85DF':
-                session['is_admin'] = True
-            else:
-                session['is_admin'] = False
-            return redirect(url_for('dashboard', professor_id=prof['id']))
-        else:
-            flash('Login inválido!')
-    return render_template('index.html')
+conn.close()
+
+if prof:
+    session['professor_id'] = prof[0]    # id
+    session['professor_email'] = prof[1]  # email
+    # Se for admin, marca na sessão
+    if prof[1] == '01099080150' and prof[2] == 'brasilia85DF':  # email e senha
+        session['is_admin'] = True
+    return redirect(url_for('dashboard'))  # ou página de destino
+else:
+    flash("Login inválido!", "danger")
+    return redirect(url_for('index'))
+
 
 # Dashboard do professor
 @app.route('/dashboard/<int:professor_id>')
