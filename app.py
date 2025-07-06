@@ -119,12 +119,13 @@ def index():
 conn.close()
 
 if prof:
-    session['professor_id'] = prof[0]    # id
+    session['professor_id'] = prof[0]  # id
     session['professor_email'] = prof[1]  # email
-    # Se for admin, marca na sessão
+            # Se for admin, marca na sessão
     if prof[1] == '01099080150' and prof[2] == 'brasilia85DF':  # email e senha
         session['is_admin'] = True
-    return redirect(url_for('dashboard'))  # ou página de destino
+    return redirect(url_for('dashboard', professor_id=prof[0]))  # CORRIGIDO AQUI
+
 else:
     flash("Login inválido!", "danger")
     return redirect(url_for('index'))
