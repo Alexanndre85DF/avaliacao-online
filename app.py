@@ -1,5 +1,4 @@
 import os
-os.system("python3 init_db.py")
 import psycopg2
 import psycopg2.extras
 from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, session
