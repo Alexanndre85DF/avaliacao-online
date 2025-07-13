@@ -107,10 +107,11 @@ def index():
     if request.method == 'POST':
         email = request.form['email']
         senha = request.form['senha']
-        # Normaliza CPF do admin
+
         admin_cpfs = ['01099080150', '010.990.801-50', '010.990.80150', '010990801-50']
         if email.replace('.', '').replace('-', '') == '01099080150':
             email = '01099080150'
+
         conn = get_db()
         cur = conn.cursor()
         cur.execute('SELECT * FROM professor WHERE email = %s AND senha = %s', (email, senha))
@@ -125,7 +126,8 @@ def index():
             return redirect(url_for('dashboard', professor_id=prof[0]))
         else:
             flash("Login inválido!", "danger")
-    return redirect(url_for('index'))
+            return render_template('index.html')  # ← substitua aqui
+
     return render_template('index.html')
 
 
