@@ -121,8 +121,11 @@ def index():
         if prof:
             session['professor_id'] = prof[0]
             session['professor_email'] = prof[1]
+            # Corrigir para garantir que is_admin sempre é setado
             if prof[1] == '01099080150' and prof[2] == 'brasilia85DF':
                 session['is_admin'] = True
+            else:
+                session['is_admin'] = False
             return redirect(url_for('dashboard', professor_id=prof[0]))
         else:
             flash("Login inválido!", "danger")

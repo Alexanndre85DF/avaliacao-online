@@ -135,7 +135,7 @@
     <div class="container">
         <div class="dashboard-header">
             <h2>Bem-vindo ao Painel do Professor</h2>
-            {% if session.is_admin %}
+            {% if session.get('is_admin') %}
             <form action="/cadastrar_professor" method="get" style="margin-bottom:18px;">
                 <button type="submit" class="btn btn-full">Cadastrar Professor</button>
             </form>
@@ -166,7 +166,7 @@
                 <li>Nenhuma avaliação criada ainda.</li>
             {% endfor %}
         </ul>
-        {% if session.is_admin %}
+        {% if session.get('is_admin') %}
         <div style="margin-bottom:32px;">
             <h3 style="color:#1976d2;">Professores cadastrados</h3>
             <table style="width:100%; border-collapse:collapse; background:#f8fafc; border-radius:8px;">
