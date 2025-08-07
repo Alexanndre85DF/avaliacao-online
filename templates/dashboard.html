@@ -156,6 +156,7 @@
                             <a href="/avaliacao/{{ av['id'] }}" class="btn-acao">Adicionar Questões</a>
                             <a href="/gerar_link/{{ av['id'] }}" class="btn-acao">Gerar Link</a>
                             <a href="/resultado/{{ av['id'] }}" class="btn-acao">Resultados</a>
+                            <a href="/corrigir_subjetivas/{{ av['id'] }}" class="btn-acao">Corrigir Subjetivas</a>
                             <form method="POST" action="/excluir_avaliacao/{{ av['id'] }}" style="display:inline;">
                                 <button type="submit" class="excluir-btn" onclick="return confirm('Tem certeza que deseja excluir esta avaliação?')">Excluir</button>
                             </form>

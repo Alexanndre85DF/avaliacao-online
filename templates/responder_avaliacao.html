@@ -33,6 +33,30 @@
         margin-bottom: 8px;
         margin-top: 8px;
     }
+    .resposta-subjetiva {
+        margin: 15px 0;
+    }
+    .resposta-subjetiva label {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 8px;
+        display: block;
+    }
+    .resposta-subjetiva textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 1em;
+        font-family: inherit;
+        resize: vertical;
+        min-height: 120px;
+    }
+    .resposta-subjetiva textarea:focus {
+        outline: none;
+        border-color: #1976d2;
+        box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+    }
     </style>
 </head>
 <body>
@@ -67,14 +91,23 @@
                     {% if q['questao']['comando'] %}
                         <div class="comando">{{ q['questao']['comando'] }}</div>
                     {% endif %}
-                    <div class="alternativas">
-                        {% for alt in q['alternativas'] %}
-                            <label>
-                                <input type="radio" name="questao_{{ q['questao']['id'] }}" value="{{ alt['id'] }}" required>
-                                {{ alt['texto'] }}
-                            </label><br>
-                        {% endfor %}
-                    </div>
+                    
+                    {% if q['questao']['tipo'] == 'objetiva' %}
+                        <div class="alternativas">
+                            {% for alt in q['alternativas'] %}
+                                <label>
+                                    <input type="radio" name="questao_{{ q['questao']['id'] }}" value="{{ alt['id'] }}" required>
+                                    {{ alt['texto'] }}
+                                </label><br>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="resposta-subjetiva">
+                            <label for="questao_{{ q['questao']['id'] }}">Sua resposta:</label><br>
+                            <textarea name="questao_{{ q['questao']['id'] }}" rows="6" cols="80" required 
+                                      placeholder="Digite sua resposta aqui..."></textarea>
+                        </div>
+                    {% endif %}
                 </div>
                 <hr>
             {% endfor %}

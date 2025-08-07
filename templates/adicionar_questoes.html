@@ -207,6 +207,30 @@
             fileNameSpan.textContent = 'Nenhum arquivo escolhido';
         }
     }
+    
+    function toggleTipoQuestao() {
+        var tipo = document.getElementById('tipo_questao').value;
+        var alternativasGroup = document.getElementById('alternativas_group');
+        var respostaCorretaGroup = document.getElementById('resposta_correta_group');
+        
+        if (tipo === 'objetiva') {
+            alternativasGroup.style.display = 'block';
+            respostaCorretaGroup.style.display = 'none';
+            // Tornar alternativas obrigatórias
+            var alternativas = document.querySelectorAll('input[name="alternativa"]');
+            alternativas.forEach(function(input) {
+                input.required = true;
+            });
+        } else {
+            alternativasGroup.style.display = 'none';
+            respostaCorretaGroup.style.display = 'block';
+            // Remover obrigatoriedade das alternativas
+            var alternativas = document.querySelectorAll('input[name="alternativa"]');
+            alternativas.forEach(function(input) {
+                input.required = false;
+            });
+        }
+    }
     document.addEventListener('DOMContentLoaded', function() {
       CKEDITOR.replace('suporte_texto', {
         height: 250,
@@ -254,10 +278,21 @@
                     <input type="text" name="comando" placeholder="Ex: Assinale a alternativa correta" required>
                 </div>
                 <div class="form-group">
+                    <label>Tipo de Questão:</label>
+                    <select name="tipo" id="tipo_questao" onchange="toggleTipoQuestao()" required>
+                        <option value="objetiva">Objetiva (Múltipla Escolha)</option>
+                        <option value="subjetiva">Subjetiva (Dissertativa)</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>Valor da Questão:</label>
                     <input type="number" name="valor" step="0.01" min="0" required>
                 </div>
-                <div class="form-group alternativas-list">
+                <div class="form-group" id="resposta_correta_group" style="display:none;">
+                    <label>Resposta Esperada (opcional):</label>
+                    <textarea name="resposta_correta" placeholder="Digite a resposta esperada para orientar a correção"></textarea>
+                </div>
+                <div class="form-group alternativas-list" id="alternativas_group">
                     <label>Alternativas:</label>
                     <div id="alternativas">
                         <div class="alternativa-item">
@@ -282,7 +317,12 @@
             <ul style="padding-left:0;">
                 {% for q in questoes %}
                     <li class="questao-item">
-                        <span style="flex:1;">{{ q['enunciado'] }} (Valor: {{ q['valor'] }})</span>
+                        <span style="flex:1;">
+                            {{ q['enunciado'] }} 
+                            <span style="color:#1976d2; font-size:0.9em;">
+                                ({{ q['tipo']|title }} - Valor: {{ q['valor'] }})
+                            </span>
+                        </span>
                         <form method="POST" action="/excluir_questao/{{ q['id'] }}/{{ avaliacao_id }}" style="display:inline;">
                             <button type="submit" class="excluir-btn" onclick="return confirm('Tem certeza que deseja excluir esta questão?')">Excluir</button>
                         </form>

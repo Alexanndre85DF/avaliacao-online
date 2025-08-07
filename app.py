@@ -79,7 +79,9 @@ def init_db():
             suporte_imagem TEXT,
             comando TEXT,
             imagem TEXT,
-            valor REAL
+            valor REAL,
+            tipo TEXT DEFAULT 'objetiva',
+            resposta_correta TEXT
         )''')
         cur.execute('''CREATE TABLE IF NOT EXISTS alternativa (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -102,7 +104,10 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             resposta_id INTEGER REFERENCES resposta(id),
             questao_id INTEGER REFERENCES questao(id),
-            alternativa_id INTEGER REFERENCES alternativa(id)
+            alternativa_id INTEGER REFERENCES alternativa(id),
+            resposta_texto TEXT,
+            corrigida INTEGER DEFAULT 0,
+            correta INTEGER DEFAULT 0
         )''')
         
         # Cria um professor padrão para testes
@@ -138,7 +143,9 @@ def init_db():
             suporte_imagem TEXT,
             comando TEXT,
             imagem TEXT,
-            valor REAL
+            valor REAL,
+            tipo TEXT DEFAULT 'objetiva',
+            resposta_correta TEXT
         )''')
         cur.execute('''CREATE TABLE IF NOT EXISTS alternativa (
             id SERIAL PRIMARY KEY,
@@ -161,7 +168,10 @@ def init_db():
             id SERIAL PRIMARY KEY,
             resposta_id INTEGER REFERENCES resposta(id),
             questao_id INTEGER REFERENCES questao(id),
-            alternativa_id INTEGER REFERENCES alternativa(id)
+            alternativa_id INTEGER REFERENCES alternativa(id),
+            resposta_texto TEXT,
+            corrigida BOOLEAN DEFAULT FALSE,
+            correta BOOLEAN DEFAULT FALSE
         )''')
         
         # Cria um professor padrão para testes
@@ -259,6 +269,8 @@ def adicionar_questoes(avaliacao_id):
         suporte_texto = request.form.get('suporte_texto')
         comando = request.form.get('comando')
         valor = float(request.form['valor'])
+        tipo = request.form.get('tipo', 'objetiva')
+        resposta_correta = request.form.get('resposta_correta', '')
         imagem = None
         suporte_imagem = None
         if 'imagem' in request.files:
@@ -275,14 +287,17 @@ def adicionar_questoes(avaliacao_id):
                 suporte_imagem = filename2
         conn = get_db()
         cur = conn.cursor()
-        cur.execute('INSERT INTO questao (avaliacao_id, enunciado, suporte_texto, suporte_imagem, comando, imagem, valor) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                    (avaliacao_id, enunciado, suporte_texto, suporte_imagem, comando, imagem, valor))
+        cur.execute('INSERT INTO questao (avaliacao_id, enunciado, suporte_texto, suporte_imagem, comando, imagem, valor, tipo, resposta_correta) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    (avaliacao_id, enunciado, suporte_texto, suporte_imagem, comando, imagem, valor, tipo, resposta_correta))
         questao_id = cur.lastrowid
-        alternativas = request.form.getlist('alternativa')
-        corretas = request.form.getlist('correta')
-        for i, alt in enumerate(alternativas):
-            cur.execute('INSERT INTO alternativa (questao_id, texto, correta) VALUES (?, ?, ?)',
-                        (questao_id, alt, str(i) in corretas))
+        
+        if tipo == 'objetiva':
+            alternativas = request.form.getlist('alternativa')
+            corretas = request.form.getlist('correta')
+            for i, alt in enumerate(alternativas):
+                cur.execute('INSERT INTO alternativa (questao_id, texto, correta) VALUES (?, ?, ?)',
+                            (questao_id, alt, str(i) in corretas))
+        
         conn.commit()
         conn.close()
         flash('Questão adicionada!')
@@ -330,10 +345,16 @@ def responder_avaliacao(avaliacao_id):
                     (avaliacao_id, aluno_nome, escola, turma, serie, componente, professor_nome, datetime.now()))
         resposta_id = cur.lastrowid
         for q in questoes:
-            alternativa_id = request.form.get(f'questao_{q["id"]}')
-            if alternativa_id:
-                cur.execute('INSERT INTO resposta_questao (resposta_id, questao_id, alternativa_id) VALUES (?, ?, ?)',
-                            (resposta_id, q['id'], alternativa_id))
+            if q['tipo'] == 'objetiva':
+                alternativa_id = request.form.get(f'questao_{q["id"]}')
+                if alternativa_id:
+                    cur.execute('INSERT INTO resposta_questao (resposta_id, questao_id, alternativa_id) VALUES (?, ?, ?)',
+                                (resposta_id, q['id'], alternativa_id))
+            else:  # subjetiva
+                resposta_texto = request.form.get(f'questao_{q["id"]}', '')
+                if resposta_texto:
+                    cur.execute('INSERT INTO resposta_questao (resposta_id, questao_id, resposta_texto) VALUES (?, ?, ?)',
+                                (resposta_id, q['id'], resposta_texto))
         conn.commit()
         conn.close()
         flash('Respostas enviadas com sucesso!')
@@ -357,17 +378,22 @@ def resultado(avaliacao_id):
     respostas = cur.fetchall()
     resultados = []
     for resp in respostas:
-        cur.execute('SELECT * FROM resposta_questao WHERE resposta_id = ?', (resp['id'],))
+        cur.execute('SELECT rq.*, q.valor FROM resposta_questao rq JOIN questao q ON rq.questao_id = q.id WHERE rq.resposta_id = ?', (resp['id'],))
         respostas_questoes = cur.fetchall()
         acertos = 0
         total = 0
         for rq in respostas_questoes:
-            cur.execute('SELECT correta, valor FROM alternativa JOIN questao ON alternativa.questao_id = questao.id WHERE alternativa.id = ?', (rq['alternativa_id'],))
-            alt = cur.fetchone()
-            if alt and alt['correta']:
-                acertos += alt['valor']
-            if alt:
-                total += alt['valor']
+            if rq['alternativa_id']:  # questão objetiva
+                cur.execute('SELECT correta, valor FROM alternativa JOIN questao ON alternativa.questao_id = questao.id WHERE alternativa.id = ?', (rq['alternativa_id'],))
+                alt = cur.fetchone()
+                if alt and alt['correta']:
+                    acertos += alt['valor']
+                if alt:
+                    total += alt['valor']
+            else:  # questão subjetiva
+                if rq['corrigida'] and rq['correta']:
+                    acertos += rq['valor']
+                total += rq['valor']
         resultados.append({'resposta': resp, 'acertos': acertos, 'total': total})
     conn.close()
     return render_template('resultado.html', resultados=resultados, professor_id=professor_id, avaliacao_id=avaliacao_id)
@@ -541,21 +567,64 @@ def grafico_resultado(avaliacao_id):
     pontuacoes = []
     nomes = []
     for resp in respostas:
-        cur.execute('SELECT * FROM resposta_questao WHERE resposta_id = ?', (resp['id'],))
+        cur.execute('SELECT rq.*, q.valor FROM resposta_questao rq JOIN questao q ON rq.questao_id = q.id WHERE rq.resposta_id = ?', (resp['id'],))
         respostas_questoes = cur.fetchall()
         acertos = 0
         total = 0
         for rq in respostas_questoes:
-            cur.execute('SELECT correta, valor FROM alternativa JOIN questao ON alternativa.questao_id = questao.id WHERE alternativa.id = ?', (rq['alternativa_id'],))
-            alt = cur.fetchone()
-            if alt and alt['correta']:
-                acertos += alt['valor']
-            if alt:
-                total += alt['valor']
+            if rq['alternativa_id']:  # questão objetiva
+                cur.execute('SELECT correta, valor FROM alternativa JOIN questao ON alternativa.questao_id = questao.id WHERE alternativa.id = ?', (rq['alternativa_id'],))
+                alt = cur.fetchone()
+                if alt and alt['correta']:
+                    acertos += alt['valor']
+                if alt:
+                    total += alt['valor']
+            else:  # questão subjetiva
+                if rq['corrigida'] and rq['correta']:
+                    acertos += rq['valor']
+                total += rq['valor']
         nomes.append(resp['aluno_nome'])
         pontuacoes.append(acertos)
     conn.close()
     return render_template('grafico_resultado.html', avaliacao_id=avaliacao_id, nomes=nomes, pontuacoes=pontuacoes)
+
+@app.route('/corrigir_subjetivas/<int:avaliacao_id>')
+def corrigir_subjetivas(avaliacao_id):
+    conn = get_db()
+    cur = conn.cursor()
+    # Buscar questões subjetivas da avaliação
+    cur.execute('SELECT * FROM questao WHERE avaliacao_id = ? AND tipo = ?', (avaliacao_id, 'subjetiva'))
+    questoes_subjetivas = cur.fetchall()
+    
+    # Buscar respostas para questões subjetivas
+    respostas_subjetivas = []
+    for questao in questoes_subjetivas:
+        cur.execute('SELECT rq.*, r.aluno_nome FROM resposta_questao rq JOIN resposta r ON rq.resposta_id = r.id WHERE rq.questao_id = ? AND rq.resposta_texto IS NOT NULL', (questao['id'],))
+        respostas = cur.fetchall()
+        respostas_subjetivas.append({'questao': questao, 'respostas': respostas})
+    
+    conn.close()
+    return render_template('corrigir_subjetivas.html', respostas_subjetivas=respostas_subjetivas, avaliacao_id=avaliacao_id)
+
+@app.route('/marcar_correta/<int:resposta_questao_id>', methods=['POST'])
+def marcar_correta(resposta_questao_id):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('UPDATE resposta_questao SET corrigida = 1, correta = 1 WHERE id = ?', (resposta_questao_id,))
+    conn.commit()
+    conn.close()
+    flash('Resposta marcada como correta!')
+    return redirect(request.referrer)
+
+@app.route('/marcar_incorreta/<int:resposta_questao_id>', methods=['POST'])
+def marcar_incorreta(resposta_questao_id):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('UPDATE resposta_questao SET corrigida = 1, correta = 0 WHERE id = ?', (resposta_questao_id,))
+    conn.commit()
+    conn.close()
+    flash('Resposta marcada como incorreta!')
+    return redirect(request.referrer)
 
 @app.route('/analise_questoes/<int:avaliacao_id>')
 def analise_questoes(avaliacao_id):
@@ -566,19 +635,26 @@ def analise_questoes(avaliacao_id):
     questoes = cur.fetchall()
     questoes_analise = []
     for questao in questoes:
-        cur.execute('SELECT * FROM alternativa WHERE questao_id = ?', (questao['id'],))
-        alternativas = cur.fetchall()
-        alternativas_dados = []
-        total_respostas = 0
-        for alt in alternativas:
-            cur.execute('SELECT COUNT(*) as total FROM resposta_questao WHERE questao_id = ? AND alternativa_id = ?', (questao['id'], alt['id']))
-            count = cur.fetchone()['total']
-            alternativas_dados.append({'id': alt['id'], 'texto': alt['texto'], 'total': count})
-            total_respostas += count
-        # Calcular porcentagem
-        for alt in alternativas_dados:
-            alt['porcentagem'] = (alt['total'] / total_respostas * 100) if total_respostas > 0 else 0
-        questoes_analise.append({'questao': questao, 'alternativas': alternativas_dados})
+        if questao['tipo'] == 'objetiva':
+            cur.execute('SELECT * FROM alternativa WHERE questao_id = ?', (questao['id'],))
+            alternativas = cur.fetchall()
+            alternativas_dados = []
+            total_respostas = 0
+            for alt in alternativas:
+                cur.execute('SELECT COUNT(*) as total FROM resposta_questao WHERE questao_id = ? AND alternativa_id = ?', (questao['id'], alt['id']))
+                count = cur.fetchone()['total']
+                alternativas_dados.append({'id': alt['id'], 'texto': alt['texto'], 'total': count})
+                total_respostas += count
+            # Calcular porcentagem
+            for alt in alternativas_dados:
+                alt['porcentagem'] = (alt['total'] / total_respostas * 100) if total_respostas > 0 else 0
+            questoes_analise.append({'questao': questao, 'alternativas': alternativas_dados})
+        else:  # subjetiva
+            cur.execute('SELECT COUNT(*) as total FROM resposta_questao WHERE questao_id = ? AND resposta_texto IS NOT NULL', (questao['id'],))
+            total = cur.fetchone()['total']
+            cur.execute('SELECT COUNT(*) as corretas FROM resposta_questao WHERE questao_id = ? AND corrigida = 1 AND correta = 1', (questao['id'],))
+            corretas = cur.fetchone()['corretas']
+            questoes_analise.append({'questao': questao, 'total': total, 'corretas': corretas})
     conn.close()
     return render_template('analise_questoes.html', questoes_analise=questoes_analise, avaliacao_id=avaliacao_id)
 

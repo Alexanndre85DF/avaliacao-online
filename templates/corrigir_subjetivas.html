@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Corrigir Questões Subjetivas</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+    .container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 32px 28px;
+        border-radius: 16px;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+        background: #fff;
+    }
+    .questao-section {
+        margin-bottom: 40px;
+        padding: 20px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: #f8fafc;
+    }
+    .questao-title {
+        color: #1976d2;
+        font-size: 1.3em;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+    .resposta-item {
+        background: #fff;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 6px;
+        border: 1px solid #e0e0e0;
+    }
+    .aluno-nome {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 8px;
+    }
+    .resposta-texto {
+        background: #f5f5f5;
+        padding: 10px;
+        border-radius: 4px;
+        margin: 8px 0;
+        white-space: pre-wrap;
+    }
+    .resposta-esperada {
+        background: #e3f2fd;
+        padding: 10px;
+        border-radius: 4px;
+        margin: 8px 0;
+        border-left: 4px solid #1976d2;
+    }
+    .acoes {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    .btn-correta {
+        background: #4caf50;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 16px;
+        cursor: pointer;
+        font-size: 0.9em;
+    }
+    .btn-incorreta {
+        background: #f44336;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 16px;
+        cursor: pointer;
+        font-size: 0.9em;
+    }
+    .status {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        font-weight: bold;
+    }
+    .status-corrigida {
+        background: #e8f5e8;
+        color: #2e7d32;
+    }
+    .status-pendente {
+        background: #fff3e0;
+        color: #f57c00;
+    }
+    .btn-voltar {
+        background: #1976d2;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 12px 24px;
+        font-size: 1em;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/dashboard/{{ session.get('professor_id', 1) }}" class="btn-voltar">← Voltar ao Dashboard</a>
+        
+        <h1 style="color:#1976d2; margin-bottom:30px;">Corrigir Questões Subjetivas</h1>
+        
+        {% if respostas_subjetivas %}
+            {% for questao_data in respostas_subjetivas %}
+                <div class="questao-section">
+                    <div class="questao-title">
+                        Questão: {{ questao_data.questao.enunciado }}
+                        {% if questao_data.questao.resposta_correta %}
+                            <div class="resposta-esperada">
+                                <strong>Resposta Esperada:</strong><br>
+                                {{ questao_data.questao.resposta_correta }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% for resposta in questao_data.respostas %}
+                        <div class="resposta-item">
+                            <div class="aluno-nome">
+                                Aluno: {{ resposta.aluno_nome }}
+                                {% if resposta.corrigida %}
+                                    <span class="status status-corrigida">
+                                        {% if resposta.correta %}
+                                            ✓ Correta
+                                        {% else %}
+                                            ✗ Incorreta
+                                        {% endif %}
+                                    </span>
+                                {% else %}
+                                    <span class="status status-pendente">Pendente</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="resposta-texto">
+                                <strong>Resposta do aluno:</strong><br>
+                                {{ resposta.resposta_texto }}
+                            </div>
+                            
+                            {% if not resposta.corrigida %}
+                                <div class="acoes">
+                                    <form method="POST" action="/marcar_correta/{{ resposta.id }}" style="display:inline;">
+                                        <button type="submit" class="btn-correta">✓ Marcar como Correta</button>
+                                    </form>
+                                    <form method="POST" action="/marcar_incorreta/{{ resposta.id }}" style="display:inline;">
+                                        <button type="submit" class="btn-incorreta">✗ Marcar como Incorreta</button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <p style="color:#888; font-style:italic;">Nenhuma resposta para esta questão ainda.</p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:#888; text-align:center; font-style:italic;">
+                Não há questões subjetivas nesta avaliação ou todas já foram corrigidas.
+            </p>
+        {% endif %}
+    </div>
+</body>
+</html> 
