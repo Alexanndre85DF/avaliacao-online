@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Análise por Questão</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .grafico-container { background: #fff; border-radius: 16px; box-shadow: 0 2px 16px #e3eaf3; padding: 32px 32px 24px 32px; margin: 32px auto; max-width: 800px; }
+        .questao-enunciado { font-weight: bold; color: #1976d2; margin-bottom: 8px; font-size: 1.15em; }
+        .btn-voltar { background: #1976d2; color: #fff; border: none; border-radius: 4px; padding: 10px 28px; font-size: 1.08em; font-weight: 500; cursor: pointer; text-align: center; margin-top: 18px; display: block; margin-left: auto; margin-right: auto; transition: background 0.2s; }
+        .btn-voltar:hover { background: #125ea7; }
+    </style>
+</head>
+<body style="background:#f6f9fc;">
+    <div style="max-width:900px; margin: 0 auto;">
+        <h2 style="color:#1976d2; text-align:center; margin-top:32px;">Análise por Questão</h2>
+        {% for q in questoes_analise %}
+        <div class="grafico-container">
+            <div class="questao-enunciado">{{ loop.index }}. {{ q.questao.enunciado }}</div>
+            {% set idx = loop.index %}
+            <canvas id="grafico_{{ idx }}" width="400" height="400"></canvas>
+            <script>
+            const ctx_{{ idx }} = document.getElementById('grafico_{{ idx }}').getContext('2d');
+            new Chart(ctx_{{ idx }}, {
+                type: 'pie',
+                data: {
+                    labels: {{ q.alternativas | map(attribute='texto') | list | tojson }},
+                    datasets: [{
+                        label: 'Porcentagem de respostas',
+                        data: {{ q.alternativas | map(attribute='porcentagem') | list | tojson }},
+                        backgroundColor: [
+                            '#1976d2', '#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#ff9f40', '#c9cbcf', '#8bc34a', '#e91e63',
+                            '#f44336', '#00bcd4', '#009688', '#cddc39', '#ffc107', '#795548', '#607d8b', '#3f51b5', '#9c27b0', '#673ab7'
+                        ],
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { display: true, position: 'bottom' },
+                        tooltip: { callbacks: { label: function(context) { return context.label + ': ' + context.parsed + '%'; } } }
+                    }
+                }
+            });
+            </script>
+        </div>
+        {% endfor %}
+        <a href="/resultado/{{ avaliacao_id }}" class="btn-voltar">Voltar</a>
+    </div>
+</body>
+</html> 

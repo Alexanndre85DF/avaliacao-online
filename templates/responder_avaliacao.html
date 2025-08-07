@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Responder Avaliação</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+    .questao-imagem {
+        display: flex;
+        justify-content: center;
+        margin: 18px 0 24px 0;
+    }
+    .questao-imagem img {
+        max-width: 90%;
+        height: auto;
+        border: 1px solid #bcdffb;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        background: #fff;
+    }
+    .suporte-texto {
+        background: #f4f8fb;
+        border-left: 4px solid #1976d2;
+        padding: 10px 16px;
+        margin: 10px 0 10px 0;
+        border-radius: 4px;
+        color: #222;
+        font-size: 1.05em;
+    }
+    .comando {
+        font-weight: 500;
+        color: #1976d2;
+        margin-bottom: 8px;
+        margin-top: 8px;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>{{ avaliacao['titulo'] }}</h2>
+        <form method="POST">
+            <h3>Identificação do(a) Estudante</h3>
+            <label>Nome completo:</label>
+            <input type="text" name="aluno_nome" required><br>
+            <label>Escola:</label>
+            <input type="text" name="escola" required><br>
+            <label>Turma:</label>
+            <input type="text" name="turma" required><br>
+            <label>Série:</label>
+            <input type="text" name="serie" required><br>
+            <label>Componente curricular:</label>
+            <input type="text" name="componente" required><br>
+            <label>Nome do professor:</label>
+            <input type="text" name="professor_nome" required><br>
+            <hr>
+            {% for q in questoes %}
+                <div class="questao">
+                    <p><b>Questão {{ loop.index }}:</b> {{ q['questao']['enunciado'] }}</p>
+                    {% if q['questao']['suporte_texto'] %}
+                        <div class="suporte-texto">{{ q['questao']['suporte_texto']|safe }}</div>
+                    {% endif %}
+                    {% if q['questao']['suporte_imagem'] %}
+                        <div class="questao-imagem">
+                            <img src="/static/uploads/{{ q['questao']['suporte_imagem'] }}" alt="Imagem de suporte">
+                        </div>
+                    {% endif %}
+                    {% if q['questao']['comando'] %}
+                        <div class="comando">{{ q['questao']['comando'] }}</div>
+                    {% endif %}
+                    <div class="alternativas">
+                        {% for alt in q['alternativas'] %}
+                            <label>
+                                <input type="radio" name="questao_{{ q['questao']['id'] }}" value="{{ alt['id'] }}" required>
+                                {{ alt['texto'] }}
+                            </label><br>
+                        {% endfor %}
+                    </div>
+                </div>
+                <hr>
+            {% endfor %}
+            <button type="submit">Enviar Respostas</button>
+        </form>
+    </div>
+</body>
+</html> 
