@@ -50,10 +50,12 @@
 
                     <div class="row">
                         <div class="col-md-6">
-                            <label for="arquivo_apoio">Arquivo de Apoio (Opcional)</label>
+                            <label for="arquivo_apoio">Arquivos de Apoio (Opcional)</label>
                             <input type="file" id="arquivo_apoio" name="arquivo_apoio" 
-                                accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png">
+                                accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" multiple>
                             <p class="text-muted">Formatos aceitos: PDF, DOC, DOCX, TXT, JPG, JPEG, PNG</p>
+                            <p class="text-muted">Você pode selecionar múltiplos arquivos</p>
+                            <div id="arquivos-selecionados" class="mt-2"></div>
                         </div>
                         <div class="col-md-6">
                             <label for="max_linhas">Número Máximo de Linhas *</label>
@@ -85,5 +87,31 @@
     </div>
 
     <script src="https://kit.fontawesome.com/your-fontawesome-kit.js"></script>
+    <script>
+        // Mostrar arquivos selecionados
+        document.getElementById('arquivo_apoio').addEventListener('change', function(e) {
+            const container = document.getElementById('arquivos-selecionados');
+            container.innerHTML = '';
+            
+            if (this.files.length > 0) {
+                const title = document.createElement('h6');
+                title.textContent = 'Arquivos selecionados:';
+                title.className = 'text-primary mb-2';
+                container.appendChild(title);
+                
+                for (let i = 0; i < this.files.length; i++) {
+                    const file = this.files[i];
+                    const fileDiv = document.createElement('div');
+                    fileDiv.className = 'd-flex align-items-center mb-1';
+                    fileDiv.innerHTML = `
+                        <i class="fas fa-file me-2 text-secondary"></i>
+                        <span class="text-muted">${file.name}</span>
+                        <small class="text-muted ms-2">(${(file.size / 1024).toFixed(1)} KB)</small>
+                    `;
+                    container.appendChild(fileDiv);
+                }
+            }
+        });
+    </script>
 </body>
 </html> 

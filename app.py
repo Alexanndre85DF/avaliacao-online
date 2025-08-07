@@ -414,13 +414,17 @@ def nova_redacao(professor_id):
             
             print(f"DEBUG: Dados recebidos - titulo: {titulo}, comando: {comando}, max_linhas: {max_linhas}")
             
-            arquivo_apoio = None
+            arquivos_apoio = []
             if 'arquivo_apoio' in request.files:
-                file = request.files['arquivo_apoio']
-                if file and file.filename != '':
-                    filename = secure_filename(file.filename)
-                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                    arquivo_apoio = filename
+                files = request.files.getlist('arquivo_apoio')
+                for file in files:
+                    if file and file.filename != '':
+                        filename = secure_filename(file.filename)
+                        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                        arquivos_apoio.append(filename)
+            
+            # Converter lista de arquivos para string JSON para armazenar no banco
+            arquivo_apoio = ','.join(arquivos_apoio) if arquivos_apoio else None
             
             conn = get_db()
             cur = conn.cursor()
