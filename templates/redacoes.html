@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redações</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="dashboard-header">
+            <h2>Redações</h2>
+            <div class="dashboard-actions">
+                <a href="{{ url_for('nova_redacao', professor_id=professor_id) }}" class="btn">
+                    <i class="fas fa-plus"></i> Nova Redação
+                </a>
+                <a href="{{ url_for('dashboard', professor_id=professor_id) }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+                </a>
+            </div>
+        </div>
+
+        {% if redacoes %}
+        <div class="row">
+            {% for redacao in redacoes %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>{{ redacao.titulo or 'Sem título' }}</h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">
+                            <strong>Criada em:</strong> {{ redacao.data_criacao if redacao.data_criacao else 'Data não disponível' }}
+                        </p>
+                        {% if redacao.comando %}
+                        <p><strong>Comando:</strong> {{ redacao.comando[:100] }}{% if redacao.comando|length > 100 %}...{% endif %}</p>
+                        {% endif %}
+                        <p class="text-muted">
+                            <strong>Máximo de linhas:</strong> {{ redacao.max_linhas }}
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('gerar_link_redacao', redacao_id=redacao.id) }}" class="btn btn-success">
+                                <i class="fas fa-link"></i> Gerar Link
+                            </a>
+                            <a href="{{ url_for('corrigir_redacoes', redacao_id=redacao.id) }}" class="btn">
+                                <i class="fas fa-check"></i> Corrigir
+                            </a>
+                            <button type="button" class="btn btn-danger" onclick="excluirRedacao({{ redacao.id }})">
+                                <i class="fas fa-trash"></i> Excluir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-file-alt" style="font-size: 3em; color: #6c757d; margin-bottom: 20px;"></i>
+                <h4 class="text-muted">Nenhuma redação criada</h4>
+                <p class="text-muted">Clique em "Nova Redação" para criar sua primeira redação.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js"></script>
+    <script>
+        function excluirRedacao(redacaoId) {
+            if (confirm('Tem certeza que deseja excluir esta redação? Esta ação não pode ser desfeita.')) {
+                fetch(`/excluir_redacao/${redacaoId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Erro ao excluir redação: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao excluir redação');
+                });
+            }
+        }
+    </script>
+</body>
+</html> 

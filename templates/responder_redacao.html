@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responder Redação</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3>{{ redacao.titulo or 'Redação' }}</h3>
+            </div>
+            <div class="card-body">
+                {% if redacao.comando %}
+                <div class="info-section">
+                    <h5><i class="fas fa-file-alt"></i> Comando da Redação:</h5>
+                    <div class="border p-3 bg-white rounded">
+                        {{ redacao.comando|safe }}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if redacao.texto_apoio %}
+                <div class="info-section">
+                    <h5><i class="fas fa-book"></i> Texto de Apoio:</h5>
+                    <div class="border p-3 bg-white rounded">
+                        {{ redacao.texto_apoio|safe }}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if redacao.arquivo_apoio %}
+                <div class="info-section">
+                    <h5><i class="fas fa-paperclip"></i> Arquivo de Apoio:</h5>
+                    <div class="border p-3 bg-white rounded">
+                        <a href="{{ url_for('static', filename='uploads/' + redacao.arquivo_apoio) }}" 
+                           target="_blank" class="btn btn-secondary">
+                            <i class="fas fa-download"></i> Baixar Arquivo
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <form method="POST">
+                    <div class="info-section">
+                        <h5><i class="fas fa-user"></i> Informações do Aluno:</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="aluno_nome">Nome Completo *</label>
+                                <input type="text" id="aluno_nome" name="aluno_nome" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="escola">Escola *</label>
+                                <input type="text" id="escola" name="escola" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="turma">Turma *</label>
+                                <input type="text" id="turma" name="turma" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="serie">Série *</label>
+                                <input type="text" id="serie" name="serie" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="componente">Componente Curricular *</label>
+                                <input type="text" id="componente" name="componente" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="professor_nome">Nome do Professor *</label>
+                            <input type="text" id="professor_nome" name="professor_nome" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5><i class="fas fa-edit"></i> Sua Redação:</h5>
+                        
+                        <div class="mb-3">
+                            <label for="titulo_redacao">
+                                <i class="fas fa-heading"></i> Título da Redação 
+                                <small class="text-muted">(Opcional)</small>
+                            </label>
+                            <input type="text" id="titulo_redacao" name="titulo_redacao" 
+                                   placeholder="Digite o título da sua redação (opcional)...">
+                        </div>
+
+                        <div class="contador-linhas">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted">
+                                    <i class="fas fa-ruler"></i> 
+                                    Linhas: <span id="contador-linhas">0</span> / {{ redacao.max_linhas }}
+                                </span>
+                                <span class="text-muted">
+                                    <i class="fas fa-font"></i> 
+                                    Caracteres: <span id="contador-caracteres">0</span>
+                                </span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar" id="progresso-linhas" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <textarea class="texto-redacao" id="texto_redacao" name="texto_redacao" 
+                            placeholder="Digite sua redação aqui..." required></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary" onclick="limparTexto()">
+                            <i class="fas fa-eraser"></i> Limpar
+                        </button>
+                        <button type="submit" class="btn" id="btn-enviar">
+                            <i class="fas fa-paper-plane"></i> Enviar Redação
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js"></script>
+    <script>
+        const textarea = document.getElementById('texto_redacao');
+        const contadorLinhas = document.getElementById('contador-linhas');
+        const contadorCaracteres = document.getElementById('contador-caracteres');
+        const progressoLinhas = document.getElementById('progresso-linhas');
+        const btnEnviar = document.getElementById('btn-enviar');
+        const maxLinhas = {{ redacao.max_linhas }};
+
+        function contarLinhas(texto) {
+            // Criar um elemento temporário para calcular linhas reais
+            const temp = document.createElement('div');
+            temp.style.cssText = window.getComputedStyle(textarea, null).cssText;
+            temp.style.height = 'auto';
+            temp.style.width = textarea.offsetWidth + 'px';
+            temp.style.position = 'absolute';
+            temp.style.visibility = 'hidden';
+            temp.style.whiteSpace = 'pre-wrap';
+            temp.style.wordWrap = 'break-word';
+            temp.style.overflow = 'hidden';
+            temp.innerHTML = texto.replace(/\n/g, '<br>');
+            
+            document.body.appendChild(temp);
+            const altura = temp.offsetHeight;
+            const alturaLinha = parseInt(window.getComputedStyle(textarea).lineHeight);
+            document.body.removeChild(temp);
+            
+            // Calcular número de linhas baseado na altura real
+            const linhas = Math.ceil(altura / alturaLinha);
+            return Math.max(1, linhas); // Mínimo de 1 linha
+        }
+
+        function atualizarContadores() {
+            const texto = textarea.value;
+            const linhas = contarLinhas(texto);
+            const caracteres = texto.length;
+
+            contadorLinhas.textContent = linhas;
+            contadorCaracteres.textContent = caracteres;
+
+            const percentual = Math.min((linhas / maxLinhas) * 100, 100);
+            progressoLinhas.style.width = percentual + '%';
+
+            if (linhas > maxLinhas) {
+                progressoLinhas.classList.remove('bg-success', 'bg-warning');
+                progressoLinhas.classList.add('bg-danger');
+                btnEnviar.disabled = true;
+                btnEnviar.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Limite Excedido';
+            } else if (linhas > maxLinhas * 0.8) {
+                progressoLinhas.classList.remove('bg-success', 'bg-danger');
+                progressoLinhas.classList.add('bg-warning');
+                btnEnviar.disabled = false;
+                btnEnviar.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Redação';
+            } else {
+                progressoLinhas.classList.remove('bg-warning', 'bg-danger');
+                progressoLinhas.classList.add('bg-success');
+                btnEnviar.disabled = false;
+                btnEnviar.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Redação';
+            }
+        }
+
+        function limparTexto() {
+            if (confirm('Tem certeza que deseja limpar todo o texto? Esta ação não pode ser desfeita.')) {
+                textarea.value = '';
+                document.getElementById('titulo_redacao').value = '';
+                atualizarContadores();
+            }
+        }
+
+        textarea.addEventListener('input', atualizarContadores);
+        textarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const linhas = contarLinhas(textarea.value);
+                if (linhas >= maxLinhas) {
+                    e.preventDefault();
+                    alert('Você atingiu o limite máximo de linhas!');
+                }
+            }
+        });
+
+        // Inicializar contadores
+        atualizarContadores();
+    </script>
+</body>
+</html> 

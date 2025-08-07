@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliações por Questões</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="dashboard-header">
+            <h2>Avaliações por Questões</h2>
+            <div class="dashboard-actions">
+                <a href="/novo/{{ professor_id }}" class="btn">+ Nova Avaliação</a>
+                <a href="/dashboard/{{ professor_id }}" class="btn btn-secondary">Voltar</a>
+            </div>
+        </div>
+
+        {% if avaliacoes %}
+        <div class="row">
+            {% for av in avaliacoes %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>{{ av['titulo'] }}</h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">
+                            <strong>Criada em:</strong> {{ av['data_criacao'] if av['data_criacao'] else 'Data não disponível' }}
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <a href="/avaliacao/{{ av['id'] }}" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Adicionar Questões
+                            </a>
+                            <a href="/gerar_link/{{ av['id'] }}" class="btn">
+                                <i class="fas fa-link"></i> Gerar Link
+                            </a>
+                            <a href="/resultado/{{ av['id'] }}" class="btn">
+                                <i class="fas fa-chart-bar"></i> Resultados
+                            </a>
+                            <a href="/corrigir_subjetivas/{{ av['id'] }}" class="btn">
+                                <i class="fas fa-check"></i> Corrigir Subjetivas
+                            </a>
+                            <form method="POST" action="/excluir_avaliacao/{{ av['id'] }}" style="display: inline;">
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir esta avaliação?')">
+                                    <i class="fas fa-trash"></i> Excluir
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-file-alt" style="font-size: 3em; color: #6c757d; margin-bottom: 20px;"></i>
+                <h4 class="text-muted">Nenhuma avaliação criada</h4>
+                <p class="text-muted">Clique em "+ Nova Avaliação" para criar sua primeira avaliação.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js"></script>
+</body>
+</html> 

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Redação</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="dashboard-header">
+            <h2>Nova Redação</h2>
+            <div class="dashboard-actions">
+                <a href="{{ url_for('redacoes', professor_id=professor_id) }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Cancelar
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Criar Nova Redação</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-12">
+                            <label for="titulo">Nome da Avaliação <small class="text-muted">(Opcional)</small></label>
+                            <input type="text" id="titulo" name="titulo" 
+                                   placeholder="Digite o nome da avaliação (opcional)...">
+                            <p class="text-muted">O aluno poderá adicionar seu próprio título na resposta</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <label for="comando">Comando da Redação *</label>
+                            <textarea id="comando" name="comando" rows="8" required 
+                                placeholder="Descreva o comando da redação que os alunos devem seguir..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <label for="texto_apoio">Texto de Apoio (Opcional)</label>
+                            <textarea id="texto_apoio" name="texto_apoio" rows="6" 
+                                placeholder="Texto de apoio para os alunos..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="arquivo_apoio">Arquivo de Apoio (Opcional)</label>
+                            <input type="file" id="arquivo_apoio" name="arquivo_apoio" 
+                                accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png">
+                            <p class="text-muted">Formatos aceitos: PDF, DOC, DOCX, TXT, JPG, JPEG, PNG</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="max_linhas">Número Máximo de Linhas *</label>
+                            <input type="number" id="max_linhas" name="max_linhas" 
+                                value="30" min="10" max="100" required>
+                            <p class="text-muted">Define o limite de linhas para a resposta do aluno</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <label for="cabecalho">Cabeçalho (Opcional)</label>
+                            <textarea id="cabecalho" name="cabecalho" rows="4" 
+                                placeholder="Informações que aparecerão no cabeçalho do formulário de resposta..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('redacoes', professor_id=professor_id) }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn">
+                            <i class="fas fa-save"></i> Criar Redação
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js"></script>
+</body>
+</html> 

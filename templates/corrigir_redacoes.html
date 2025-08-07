@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corrigir Redações</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .redacao-texto {
+            font-family: 'Courier New', monospace;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+            margin: 10px 0;
+        }
+        .competencia-input {
+            width: 100px;
+            text-align: center;
+        }
+        .nota-final {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #27ae60;
+        }
+        .badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        .badge.bg-success {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+        }
+        .badge.bg-warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+        .alert {
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 2px solid #27ae60;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="dashboard-header">
+            <h2>Corrigir Redações - {{ redacao.titulo or 'Sem título' }}</h2>
+            <div class="dashboard-actions">
+                <a href="{{ url_for('redacoes', professor_id=professor_id) }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Voltar às Redações
+                </a>
+            </div>
+        </div>
+
+        {% if redacao %}
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-info-circle"></i> Informações da Redação</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Título:</strong> {{ redacao.titulo or 'Sem título' }}</p>
+                        <p><strong>Criada em:</strong> {{ redacao.data_criacao if redacao.data_criacao else 'Data não disponível' }}</p>
+                        <p><strong>Máximo de linhas:</strong> {{ redacao.max_linhas }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        {% if redacao.comando %}
+                        <p><strong>Comando:</strong></p>
+                        <div class="redacao-texto">{{ redacao.comando|safe }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if respostas %}
+        <div class="row">
+            {% for resposta in respostas %}
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4><i class="fas fa-user"></i> {{ resposta.aluno_nome }}</h4>
+                            <span class="badge {% if resposta.corrigida %}bg-success{% else %}bg-warning{% endif %}">
+                                {% if resposta.corrigida %}Corrigida{% else %}Pendente{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Escola:</strong> {{ resposta.escola }}</p>
+                                <p><strong>Turma:</strong> {{ resposta.turma }}</p>
+                                <p><strong>Série:</strong> {{ resposta.serie }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Componente:</strong> {{ resposta.componente }}</p>
+                                <p><strong>Professor:</strong> {{ resposta.professor_nome }}</p>
+                                <p><strong>Enviada em:</strong> {{ resposta.data_envio if resposta.data_envio else 'Data não disponível' }}</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h5><i class="fas fa-edit"></i> Redação do Aluno:</h5>
+                            <div class="redacao-texto">{{ resposta.texto_redacao }}</div>
+                        </div>
+
+                        {% if not resposta.corrigida %}
+                        <div class="mb-3">
+                            <h5><i class="fas fa-star"></i> Avaliação por Competências:</h5>
+                            <form id="form-avaliacao-{{ resposta.id }}" onsubmit="avaliarRedacao(event, {{ resposta.id }})">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-2">
+                                            <label>Competência 1 (Domínio da norma culta):</label>
+                                            <input type="number" class="competencia-input" name="competencia1" 
+                                                min="0" max="200" step="0.1" required>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label>Competência 2 (Compreensão da proposta):</label>
+                                            <input type="number" class="competencia-input" name="competencia2" 
+                                                min="0" max="200" step="0.1" required>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label>Competência 3 (Capacidade de argumentação):</label>
+                                            <input type="number" class="competencia-input" name="competencia3" 
+                                                min="0" max="200" step="0.1" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-2">
+                                            <label>Competência 4 (Conhecimento dos mecanismos linguísticos):</label>
+                                            <input type="number" class="competencia-input" name="competencia4" 
+                                                min="0" max="200" step="0.1" required>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label>Competência 5 (Proposta de intervenção):</label>
+                                            <input type="number" class="competencia-input" name="competencia5" 
+                                                min="0" max="200" step="0.1" required>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label>Nota Final:</label>
+                                            <input type="number" class="competencia-input nota-final" name="nota_final" 
+                                                min="0" max="1000" step="0.1" required readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-check"></i> Finalizar Correção
+                                </button>
+                            </form>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-success">
+                            <h5><i class="fas fa-check-circle"></i> Redação Corrigida</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Competência 1:</strong> {{ resposta.competencia1 }}</p>
+                                    <p><strong>Competência 2:</strong> {{ resposta.competencia2 }}</p>
+                                    <p><strong>Competência 3:</strong> {{ resposta.competencia3 }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Competência 4:</strong> {{ resposta.competencia4 }}</p>
+                                    <p><strong>Competência 5:</strong> {{ resposta.competencia5 }}</p>
+                                    <p class="nota-final"><strong>Nota Final:</strong> {{ resposta.nota_final }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-inbox" style="font-size: 3em; color: #6c757d; margin-bottom: 20px;"></i>
+                <h4 class="text-muted">Nenhuma resposta recebida</h4>
+                <p class="text-muted">Ainda não há redações enviadas pelos alunos.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js"></script>
+    <script>
+        function calcularNotaFinal(form) {
+            const competencias = ['competencia1', 'competencia2', 'competencia3', 'competencia4', 'competencia5'];
+            let soma = 0;
+            
+            competencias.forEach(comp => {
+                const valor = parseFloat(form.querySelector(`[name="${comp}"]`).value) || 0;
+                soma += valor;
+            });
+            
+            const notaFinal = soma; // Soma total, não média
+            form.querySelector('[name="nota_final"]').value = notaFinal.toFixed(1);
+        }
+
+        function avaliarRedacao(event, respostaId) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            fetch(`/avaliar_redacao/${respostaId}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erro ao avaliar redação: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao avaliar redação');
+            });
+        }
+
+        // Calcular nota final automaticamente quando as competências são alteradas
+        document.addEventListener('DOMContentLoaded', function() {
+            const forms = document.querySelectorAll('form[id^="form-avaliacao-"]');
+            forms.forEach(form => {
+                const inputs = form.querySelectorAll('.competencia-input');
+                inputs.forEach(input => {
+                    input.addEventListener('input', () => calcularNotaFinal(form));
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

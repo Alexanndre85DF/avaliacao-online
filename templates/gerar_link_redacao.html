@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerar Link - Redação</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">Link da Redação</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h5>{{ redacao.titulo or 'Sem título' }}</h5>
+                            <p class="text-muted">
+                                Criada em: {{ redacao.data_criacao if redacao.data_criacao else 'Data não disponível' }}
+                            </p>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Link para os alunos:</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="linkRedacao" 
+                                    value="{{ request.host_url }}responder_redacao/{{ redacao.id }}" readonly>
+                                <button class="btn btn-outline-primary" type="button" onclick="copiarLink()">
+                                    <i class="fas fa-copy"></i> Copiar
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">QR Code:</label>
+                            <div class="text-center">
+                                <div id="qrcode"></div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle"></i> Instruções:</h6>
+                            <ul class="mb-0">
+                                <li>Compartilhe este link com seus alunos</li>
+                                <li>Os alunos poderão acessar e responder a redação</li>
+                                <li>Você poderá corrigir as respostas na seção "Corrigir"</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('redacoes', professor_id=professor_id) }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Voltar às Redações
+                            </a>
+                            <a href="{{ url_for('corrigir_redacoes', redacao_id=redacao.id) }}" class="btn btn-success">
+                                <i class="fas fa-check"></i> Ver Respostas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.0/build/qrcode.min.js"></script>
+    <script>
+        function copiarLink() {
+            const linkInput = document.getElementById('linkRedacao');
+            linkInput.select();
+            linkInput.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+            btn.classList.remove('btn-outline-primary');
+            btn.classList.add('btn-success');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-outline-primary');
+            }, 2000);
+        }
+
+        // Gerar QR Code
+        const link = document.getElementById('linkRedacao').value;
+        QRCode.toCanvas(document.getElementById('qrcode'), link, function (error) {
+            if (error) console.error(error);
+        });
+    </script>
+</body>
+</html> 

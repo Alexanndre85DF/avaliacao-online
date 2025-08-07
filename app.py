@@ -1,5 +1,6 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, session
+import json
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, session, jsonify
 from werkzeug.utils import secure_filename
 from datetime import datetime
 
@@ -110,6 +111,40 @@ def init_db():
             correta INTEGER DEFAULT 0
         )''')
         
+        # Tabelas para redação
+        cur.execute('''CREATE TABLE IF NOT EXISTS redacao (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            professor_id INTEGER REFERENCES professor(id),
+            titulo TEXT,
+            texto_apoio TEXT,
+            arquivo_apoio TEXT,
+            cabecalho TEXT,
+            comando TEXT,
+            max_linhas INTEGER DEFAULT 30,
+            data_criacao TIMESTAMP
+        )''')
+        
+        cur.execute('''CREATE TABLE IF NOT EXISTS resposta_redacao (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            redacao_id INTEGER REFERENCES redacao(id),
+            aluno_nome TEXT,
+            escola TEXT,
+            turma TEXT,
+            serie TEXT,
+            componente TEXT,
+            professor_nome TEXT,
+            texto_redacao TEXT,
+            titulo_redacao TEXT,
+            nota_final REAL,
+            competencia1 REAL,
+            competencia2 REAL,
+            competencia3 REAL,
+            competencia4 REAL,
+            competencia5 REAL,
+            corrigida INTEGER DEFAULT 0,
+            data_envio TIMESTAMP
+        )''')
+        
         # Cria um professor padrão para testes
         cur.execute('SELECT * FROM professor WHERE email = ?', ('prof@escola.com',))
         if not cur.fetchone():
@@ -172,6 +207,40 @@ def init_db():
             resposta_texto TEXT,
             corrigida BOOLEAN DEFAULT FALSE,
             correta BOOLEAN DEFAULT FALSE
+        )''')
+        
+        # Tabelas para redação
+        cur.execute('''CREATE TABLE IF NOT EXISTS redacao (
+            id SERIAL PRIMARY KEY,
+            professor_id INTEGER REFERENCES professor(id),
+            titulo TEXT,
+            texto_apoio TEXT,
+            arquivo_apoio TEXT,
+            cabecalho TEXT,
+            comando TEXT,
+            max_linhas INTEGER DEFAULT 30,
+            data_criacao TIMESTAMP
+        )''')
+        
+        cur.execute('''CREATE TABLE IF NOT EXISTS resposta_redacao (
+            id SERIAL PRIMARY KEY,
+            redacao_id INTEGER REFERENCES redacao(id),
+            aluno_nome TEXT,
+            escola TEXT,
+            turma TEXT,
+            serie TEXT,
+            componente TEXT,
+            professor_nome TEXT,
+            texto_redacao TEXT,
+            titulo_redacao TEXT,
+            nota_final REAL,
+            competencia1 REAL,
+            competencia2 REAL,
+            competencia3 REAL,
+            competencia4 REAL,
+            competencia5 REAL,
+            corrigida BOOLEAN DEFAULT FALSE,
+            data_envio TIMESTAMP
         )''')
         
         # Cria um professor padrão para testes
@@ -245,6 +314,203 @@ def dashboard(professor_id):
     
     conn.close()
     return render_template('dashboard.html', professor_id=professor_id, avaliacoes=avaliacoes, professores=professores, nome_professor=nome_professor)
+
+@app.route('/avaliacoes_questoes/<int:professor_id>')
+def avaliacoes_questoes(professor_id):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM avaliacao WHERE professor_id = ?', (professor_id,))
+    avaliacoes = cur.fetchall()
+    conn.close()
+    return render_template('avaliacoes_questoes.html', professor_id=professor_id, avaliacoes=avaliacoes)
+
+@app.route('/redacoes/<int:professor_id>')
+def redacoes(professor_id):
+    print(f"DEBUG: Acessando redacoes para professor_id: {professor_id}")
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        
+        # Verificar se a tabela redacao existe
+        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='redacao'")
+        if not cur.fetchone():
+            print("DEBUG: Tabela redacao não existe, criando...")
+            init_db()
+        
+        cur.execute('SELECT * FROM redacao WHERE professor_id = ?', (professor_id,))
+        redacoes = cur.fetchall()
+        print(f"DEBUG: Encontradas {len(redacoes)} redações")
+        conn.close()
+        return render_template('redacoes.html', professor_id=professor_id, redacoes=redacoes)
+    except Exception as e:
+        print(f"DEBUG: Erro na rota redacoes: {e}")
+        return f"Erro: {str(e)}", 500
+
+@app.route('/nova_redacao/<int:professor_id>', methods=['GET', 'POST'])
+def nova_redacao(professor_id):
+    if request.method == 'POST':
+        print("DEBUG: Recebido POST para nova_redacao")
+        try:
+            titulo = request.form.get('titulo', '')
+            texto_apoio = request.form.get('texto_apoio', '')
+            cabecalho = request.form.get('cabecalho', '')
+            comando = request.form.get('comando', '')
+            max_linhas = int(request.form.get('max_linhas', 30))
+            
+            print(f"DEBUG: Dados recebidos - titulo: {titulo}, comando: {comando}, max_linhas: {max_linhas}")
+            
+            arquivo_apoio = None
+            if 'arquivo_apoio' in request.files:
+                file = request.files['arquivo_apoio']
+                if file and file.filename != '':
+                    filename = secure_filename(file.filename)
+                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                    arquivo_apoio = filename
+            
+            conn = get_db()
+            cur = conn.cursor()
+            
+            # Verificar se a tabela redacao existe
+            cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='redacao'")
+            if not cur.fetchone():
+                print("DEBUG: Tabela redacao não existe, criando...")
+                init_db()
+            
+            cur.execute('INSERT INTO redacao (professor_id, titulo, texto_apoio, arquivo_apoio, cabecalho, comando, max_linhas, data_criacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                        (professor_id, titulo or '', texto_apoio, arquivo_apoio, cabecalho, comando, max_linhas, datetime.now()))
+            redacao_id = cur.lastrowid
+            conn.commit()
+            conn.close()
+            print(f"DEBUG: Redação criada com ID: {redacao_id}")
+            flash('Redação criada com sucesso!')
+            return redirect(url_for('gerar_link_redacao', redacao_id=redacao_id))
+        except Exception as e:
+            print(f"DEBUG: Erro ao criar redação: {e}")
+            flash(f'Erro ao criar redação: {str(e)}')
+            return redirect(url_for('redacoes', professor_id=professor_id))
+    
+    return render_template('nova_redacao.html', professor_id=professor_id)
+
+@app.route('/gerar_link_redacao/<int:redacao_id>')
+def gerar_link_redacao(redacao_id):
+    try:
+        print(f"DEBUG: Gerando link para redacao_id: {redacao_id}")
+        conn = get_db()
+        cur = conn.cursor()
+        
+        # Verificar se a tabela redacao existe
+        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='redacao'")
+        if not cur.fetchone():
+            print("DEBUG: Tabela redacao não existe, criando...")
+            init_db()
+        
+        cur.execute('SELECT * FROM redacao WHERE id = ?', (redacao_id,))
+        redacao = cur.fetchone()
+        
+        if not redacao:
+            print(f"DEBUG: Redação {redacao_id} não encontrada")
+            flash('Redação não encontrada!')
+            return redirect(url_for('index'))
+        
+        professor_id = redacao['professor_id']
+        print(f"DEBUG: professor_id: {professor_id}")
+        print(f"DEBUG: redacao data: {redacao}")
+        
+        conn.close()
+        return render_template('gerar_link_redacao.html', redacao=redacao, professor_id=professor_id)
+    except Exception as e:
+        print(f"DEBUG: Erro ao gerar link da redação: {e}")
+        import traceback
+        traceback.print_exc()
+        flash(f'Erro ao gerar link: {str(e)}')
+        return redirect(url_for('index'))
+
+@app.route('/responder_redacao/<int:redacao_id>', methods=['GET', 'POST'])
+def responder_redacao(redacao_id):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM redacao WHERE id = ?', (redacao_id,))
+    redacao = cur.fetchone()
+    
+    if request.method == 'POST':
+        aluno_nome = request.form['aluno_nome']
+        escola = request.form['escola']
+        turma = request.form['turma']
+        serie = request.form['serie']
+        componente = request.form['componente']
+        professor_nome = request.form['professor_nome']
+        texto_redacao = request.form['texto_redacao']
+        titulo_redacao = request.form.get('titulo_redacao', '')
+        
+        cur.execute('INSERT INTO resposta_redacao (redacao_id, aluno_nome, escola, turma, serie, componente, professor_nome, texto_redacao, titulo_redacao, data_envio) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    (redacao_id, aluno_nome, escola, turma, serie, componente, professor_nome, texto_redacao, titulo_redacao, datetime.now()))
+        conn.commit()
+        conn.close()
+        flash('Redação enviada com sucesso!')
+        return redirect(url_for('redacao_enviada'))
+    
+    conn.close()
+    return render_template('responder_redacao.html', redacao=redacao)
+
+@app.route('/redacao_enviada')
+def redacao_enviada():
+    return '<h2>Redação enviada! Obrigado por participar.</h2>'
+
+@app.route('/corrigir_redacoes/<int:redacao_id>')
+def corrigir_redacoes(redacao_id):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM redacao WHERE id = ?', (redacao_id,))
+    redacao = cur.fetchone()
+    cur.execute('SELECT * FROM resposta_redacao WHERE redacao_id = ?', (redacao_id,))
+    respostas = cur.fetchall()
+    conn.close()
+    
+    # Get professor_id from the redacao
+    professor_id = redacao['professor_id'] if redacao else None
+    
+    return render_template('corrigir_redacoes.html', redacao=redacao, respostas=respostas, professor_id=professor_id)
+
+@app.route('/avaliar_redacao/<int:resposta_id>', methods=['POST'])
+def avaliar_redacao(resposta_id):
+    try:
+        competencia1 = float(request.form.get('competencia1', 0))
+        competencia2 = float(request.form.get('competencia2', 0))
+        competencia3 = float(request.form.get('competencia3', 0))
+        competencia4 = float(request.form.get('competencia4', 0))
+        competencia5 = float(request.form.get('competencia5', 0))
+        
+        nota_final = competencia1 + competencia2 + competencia3 + competencia4 + competencia5
+        
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute('UPDATE resposta_redacao SET competencia1 = ?, competencia2 = ?, competencia3 = ?, competencia4 = ?, competencia5 = ?, nota_final = ?, corrigida = 1 WHERE id = ?',
+                    (competencia1, competencia2, competencia3, competencia4, competencia5, nota_final, resposta_id))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'Redação avaliada com sucesso!'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/excluir_redacao/<int:redacao_id>', methods=['POST'])
+def excluir_redacao(redacao_id):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('SELECT professor_id FROM redacao WHERE id = ?', (redacao_id,))
+    row = cur.fetchone()
+    if not row:
+        conn.close()
+        flash('Redação não encontrada!')
+        return redirect(url_for('index'))
+    professor_id = row['professor_id']
+    
+    cur.execute('DELETE FROM resposta_redacao WHERE redacao_id = ?', (redacao_id,))
+    cur.execute('DELETE FROM redacao WHERE id = ?', (redacao_id,))
+    conn.commit()
+    conn.close()
+    flash('Redação excluída com sucesso!')
+    return redirect(url_for('redacoes', professor_id=professor_id))
 
 # Criar nova avaliação
 @app.route('/novo/<int:professor_id>', methods=['GET', 'POST'])
