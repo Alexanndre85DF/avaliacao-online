@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Responder Avaliação</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
     .questao-imagem {
         display: flex;
@@ -33,64 +34,125 @@
         margin-bottom: 8px;
         margin-top: 8px;
     }
-
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>{{ avaliacao['titulo'] }}</h2>
-        <form method="POST">
-            <h3>Identificação do(a) Estudante</h3>
-            <label>Nome completo:</label>
-            <input type="text" name="aluno_nome" required><br>
-            <label>Escola:</label>
-            <input type="text" name="escola" required><br>
-            <label>Turma:</label>
-            <input type="text" name="turma" required><br>
-            <label>Série:</label>
-            <input type="text" name="serie" required><br>
-            <label>Componente curricular:</label>
-            <input type="text" name="componente" required><br>
-            <label>Nome do professor:</label>
-            <input type="text" name="professor_nome" required><br>
-            <hr>
-            {% for q in questoes %}
-                <div class="questao">
-                    <p><b>Questão {{ loop.index }}:</b> {{ q['questao']['enunciado'] }}</p>
-                    {% if q['questao']['suporte_texto'] %}
-                        <div class="suporte-texto">{{ q['questao']['suporte_texto']|safe }}</div>
-                    {% endif %}
-                    {% if q['questao']['suporte_imagem'] %}
-                        <div class="questao-imagem">
-                            <img src="/static/uploads/{{ q['questao']['suporte_imagem'] }}" alt="Imagem de suporte">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3>{{ avaliacao['titulo'] }}</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="info-section">
+                        <h5><i class="fas fa-user"></i> Identificação do(a) Estudante:</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="aluno_nome">Nome Completo *</label>
+                                <input type="text" id="aluno_nome" name="aluno_nome" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="escola">Escola *</label>
+                                <input type="text" id="escola" name="escola" required>
+                            </div>
                         </div>
-                    {% endif %}
-                    {% if q['questao']['comando'] %}
-                        <div class="comando">{{ q['questao']['comando'] }}</div>
-                    {% endif %}
-                    
-                    {% if q['questao']['tipo'] == 'objetiva' %}
-                        <div class="alternativas">
-                            {% for alt in q['alternativas'] %}
-                                <label>
-                                    <input type="radio" name="questao_{{ q['questao']['id'] }}" value="{{ alt['id'] }}" required>
-                                    {{ alt['texto'] }}
-                                </label><br>
-                            {% endfor %}
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="turma">Turma *</label>
+                                <input type="text" id="turma" name="turma" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="serie">Série *</label>
+                                <input type="text" id="serie" name="serie" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="componente">Componente Curricular *</label>
+                                <input type="text" id="componente" name="componente" required>
+                            </div>
                         </div>
-                    {% else %}
-                        <div class="alternativas">
-                            <label>
-                                <textarea name="questao_{{ q['questao']['id'] }}" rows="6" cols="80" required 
-                                          placeholder="Digite sua resposta aqui..." style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; resize: vertical;"></textarea>
-                            </label>
+                        <div>
+                            <label for="professor_nome">Nome do Professor *</label>
+                            <input type="text" id="professor_nome" name="professor_nome" required>
                         </div>
-                    {% endif %}
-                </div>
-                <hr>
-            {% endfor %}
-            <button type="submit">Enviar Respostas</button>
-        </form>
+                    </div>
+                    <div class="mb-4">
+                        <h5><i class="fas fa-question-circle"></i> Questões:</h5>
+                        
+                        {% for q in questoes %}
+                        <div class="questao mb-4">
+                            <div class="info-section">
+                                <h6><i class="fas fa-list-ol"></i> Questão {{ loop.index }}:</h6>
+                                <div class="border p-3 bg-white rounded">
+                                    {{ q['questao']['enunciado']|safe }}
+                                </div>
+                            </div>
+                            
+                            {% if q['questao']['suporte_texto'] %}
+                            <div class="info-section">
+                                <h6><i class="fas fa-book"></i> Texto de Apoio:</h6>
+                                <div class="border p-3 bg-white rounded">
+                                    {{ q['questao']['suporte_texto']|safe }}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if q['questao']['suporte_imagem'] %}
+                            <div class="info-section">
+                                <h6><i class="fas fa-image"></i> Imagem de Apoio:</h6>
+                                <div class="border p-3 bg-white rounded">
+                                    <img src="{{ url_for('static', filename='uploads/' + q['questao']['suporte_imagem']) }}" 
+                                         alt="Imagem de suporte" class="img-fluid">
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if q['questao']['comando'] %}
+                            <div class="info-section">
+                                <h6><i class="fas fa-file-alt"></i> Comando:</h6>
+                                <div class="border p-3 bg-white rounded">
+                                    {{ q['questao']['comando']|safe }}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if q['questao']['tipo'] == 'objetiva' %}
+                            <div class="info-section">
+                                <h6><i class="fas fa-check-circle"></i> Alternativas:</h6>
+                                <div class="border p-3 bg-white rounded">
+                                    {% for alt in q['alternativas'] %}
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" 
+                                               name="questao_{{ q['questao']['id'] }}" 
+                                               value="{{ alt['id'] }}" id="alt_{{ alt['id'] }}" required>
+                                        <label class="form-check-label" for="alt_{{ alt['id'] }}">
+                                            {{ alt['texto'] }}
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="info-section">
+                                <h6><i class="fas fa-edit"></i> Sua Resposta:</h6>
+                                <textarea name="questao_{{ q['questao']['id'] }}" rows="6" 
+                                          placeholder="Digite sua resposta aqui..." required 
+                                          class="form-control"></textarea>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn">
+                            <i class="fas fa-paper-plane"></i> Enviar Respostas
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
+
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js"></script>
 </body>
 </html> 

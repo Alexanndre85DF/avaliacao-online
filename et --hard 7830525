@@ -1,0 +1,10 @@
+[33m5f0a410[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Simplificar sistema de redação - remover contagem de linhas em tempo real e manter apenas informação sugerida
+[33me2d56c0[m Corrigir erro de debug na rota responder_redacao - usar acesso direto em vez de .get() para sqlite3.Row
+[33m3e6703d[m Simplificar função contarLinhas e adicionar logs de debug na rota responder_redacao
+[33mf9a7eb1[m Corrigir bug no contador de linhas - ajustar cálculo para caracteres únicos
+[33m25b4ebb[m Corrigir erro interno do servidor na rota responder_redacao - adicionar try-except e melhorar carregamento do JavaScript
+[33m7830525[m Melhorar contador de linhas baseado na visualização real do texto
+[33m4108ef9[m Adiciona suporte para múltiplos arquivos de apoio na criação de redações
+[33mf59a033[m Adiciona funcionalidade de trocar senha e melhora layout da tela de adicionar questões
+[33m0b1a25b[m Atualizações: novo design azul, módulo redação, campos compactos
+[33mc36e8ca[m Ajustado visual das questões subjetivas para ficar igual aos demais campos
