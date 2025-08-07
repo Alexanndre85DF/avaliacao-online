@@ -315,6 +315,61 @@ def dashboard(professor_id):
     conn.close()
     return render_template('dashboard.html', professor_id=professor_id, avaliacoes=avaliacoes, professores=professores, nome_professor=nome_professor)
 
+# Rota para trocar senha
+@app.route('/trocar_senha/<int:professor_id>', methods=['GET', 'POST'])
+def trocar_senha(professor_id):
+    # Verificar se o usuário está logado e é o próprio usuário ou admin
+    if 'professor_id' not in session:
+        return redirect(url_for('index'))
+    
+    if session['professor_id'] != professor_id and not session.get('is_admin'):
+        flash("Acesso negado!", "danger")
+        return redirect(url_for('dashboard', professor_id=session['professor_id']))
+    
+    if request.method == 'POST':
+        senha_atual = request.form['senha_atual']
+        nova_senha = request.form['nova_senha']
+        confirmar_senha = request.form['confirmar_senha']
+        
+        # Validar se as senhas coincidem
+        if nova_senha != confirmar_senha:
+            return render_template('trocar_senha.html', professor_id=professor_id, 
+                                mensagem="As senhas não coincidem!", sucesso=False)
+        
+        # Validar tamanho mínimo da senha
+        if len(nova_senha) < 6:
+            return render_template('trocar_senha.html', professor_id=professor_id, 
+                                mensagem="A nova senha deve ter pelo menos 6 caracteres!", sucesso=False)
+        
+        conn = get_db()
+        cur = execute_query(conn, 'SELECT senha FROM professor WHERE id = ?', (professor_id,))
+        professor = cur.fetchone()
+        
+        if not professor:
+            conn.close()
+            return render_template('trocar_senha.html', professor_id=professor_id, 
+                                mensagem="Professor não encontrado!", sucesso=False)
+        
+        # Verificar se a senha atual está correta
+        if professor['senha'] != senha_atual:
+            conn.close()
+            return render_template('trocar_senha.html', professor_id=professor_id, 
+                                mensagem="Senha atual incorreta!", sucesso=False)
+        
+        # Atualizar a senha
+        try:
+            execute_query(conn, 'UPDATE professor SET senha = ? WHERE id = ?', (nova_senha, professor_id))
+            conn.commit()
+            conn.close()
+            flash("Senha alterada com sucesso!", "success")
+            return redirect(url_for('dashboard', professor_id=professor_id))
+        except Exception as e:
+            conn.close()
+            return render_template('trocar_senha.html', professor_id=professor_id, 
+                                mensagem=f"Erro ao alterar senha: {str(e)}", sucesso=False)
+    
+    return render_template('trocar_senha.html', professor_id=professor_id)
+
 @app.route('/avaliacoes_questoes/<int:professor_id>')
 def avaliacoes_questoes(professor_id):
     conn = get_db()

@@ -16,11 +16,11 @@ body {
 /* ===== CONTAINER SYSTEM ===== */
 .container {
     background: #fff;
-    max-width: 1200px;
-    margin: 20px auto;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    max-width: 100%;
+    margin: 0;
+    padding: 20px;
+    border-radius: 0;
+    box-shadow: none;
     min-height: calc(100vh - 40px);
 }
 
@@ -108,6 +108,7 @@ input[type="number"],
 textarea,
 select {
     width: 100%;
+    max-width: 100%;
     padding: 15px 20px;
     margin: 8px 0 20px 0;
     border: 2px solid #e9ecef;
@@ -115,6 +116,7 @@ select {
     font-size: 1em;
     transition: all 0.3s ease;
     background: #f8f9fa;
+    box-sizing: border-box;
 }
 
 input[type="text"]:focus, 
@@ -357,6 +359,21 @@ tr:hover {
     background: #f8f9fa;
 }
 
+/* ===== CARD FORM SPECIFIC ===== */
+.card-body form {
+    max-width: 100%;
+    margin: 0;
+}
+
+.card-body form input[type="text"],
+.card-body form input[type="number"],
+.card-body form select,
+.card-body form textarea {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
 .container form input[type="text"]:focus,
 .container form input[type="password"]:focus {
     outline: none;
@@ -376,9 +393,9 @@ tr:hover {
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
     .container, .container-fluid {
-        margin: 10px;
-        padding: 20px;
-        border-radius: 15px;
+        margin: 0;
+        padding: 10px;
+        border-radius: 0;
     }
     
     .dashboard-header {

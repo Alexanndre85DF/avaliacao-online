@@ -5,30 +5,6 @@
     <title>Adicionar Questões</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
-    .form-card {
-        background: #fff;
-        border-radius: 10px;
-        box-shadow: 0 2px 12px rgba(25, 118, 210, 0.07);
-        padding: 32px 28px 24px 28px;
-        margin-bottom: 24px;
-        margin-top: 18px;
-        max-width: 500px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    .form-card h2 {
-        color: #1976d2;
-        margin-bottom: 18px;
-        font-size: 1.5em;
-    }
-    .form-group {
-        margin-bottom: 18px;
-    }
-    .form-group label {
-        font-weight: 500;
-        margin-bottom: 4px;
-        display: block;
-    }
     .alternativas-list {
         margin-bottom: 18px;
     }
@@ -148,6 +124,39 @@
         color: #1976d2;
         font-size: 0.98em;
     }
+    
+    /* FORÇA TODOS OS CAMPOS A OCUPAREM 100% DA LARGURA */
+    .card-body input[type="text"],
+    .card-body input[type="number"],
+    .card-body select,
+    .card-body textarea {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* FORÇA O CKEDITOR A OCUPAR 100% */
+    .cke_chrome {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    .cke_editor_suporte_texto {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    /* FORÇA TODOS OS ELEMENTOS DENTRO DO CARD */
+    .card-body * {
+        max-width: 100% !important;
+    }
+    
+    /* FORÇA OS CAMPOS DE ALTERNATIVAS */
+    .alternativa-item input[type="text"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 1 !important;
+    }
     </style>
     <!-- CKEditor CDN -->
     <script src="https://cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
@@ -234,6 +243,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       CKEDITOR.replace('suporte_texto', {
         height: 250,
+        width: '100%',
         removePlugins: 'elementspath',
         resize_enabled: false,
         extraPlugins: 'justify',
@@ -247,73 +257,118 @@
           [ 'RemoveFormat', 'Source' ]
         ]
       });
+      
+      // Força o CKEditor a ocupar toda a largura após ser criado
+      setTimeout(function() {
+        var editor = CKEDITOR.instances.suporte_texto;
+        if (editor) {
+          editor.resize('100%', 250);
+          var element = editor.element;
+          if (element) {
+            element.setStyle('width', '100%');
+            element.setStyle('max-width', '100%');
+          }
+        }
+      }, 100);
     });
     </script>
 </head>
 <body>
-    <div class="container">
-        <div class="form-card">
+    <div class="container-fluid">
+        <div class="dashboard-header">
             <h2>Adicionar Questão</h2>
-            <form method="POST" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label>Enunciado:</label>
-                    <textarea name="enunciado" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Suporte (texto opcional):</label>
-                    <textarea name="suporte_texto" id="suporte_texto" placeholder="Digite o texto de apoio, se houver"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Suporte (imagem opcional):</label>
-                    <div class="file-input-wrapper">
-                        <label class="file-input-label">Escolher Arquivo
-                            <input type="file" name="suporte_imagem" accept="image/*" onchange="previewSuporteImagem(this)">
-                        </label>
-                        <span class="file-chosen" id="suporte-file-chosen">Nenhum arquivo escolhido</span>
-                    </div>
-                    <img id="suporte-preview-imagem" alt="Prévia da imagem de suporte" style="display:none; max-width:200px; margin-top:8px; border:1px solid #bcdffb; border-radius:4px;" />
-                </div>
-                <div class="form-group">
-                    <label>Comando:</label>
-                    <input type="text" name="comando" placeholder="Ex: Assinale a alternativa correta" required>
-                </div>
-                <div class="form-group">
-                    <label>Tipo de Questão:</label>
-                    <select name="tipo" id="tipo_questao" onchange="toggleTipoQuestao()" required>
-                        <option value="objetiva">Objetiva (Múltipla Escolha)</option>
-                        <option value="subjetiva">Subjetiva (Dissertativa)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Valor da Questão:</label>
-                    <input type="number" name="valor" step="0.01" min="0" required>
-                </div>
-                <div class="form-group" id="resposta_correta_group" style="display:none;">
-                    <label>Resposta Esperada (opcional):</label>
-                    <textarea name="resposta_correta" placeholder="Digite a resposta esperada para orientar a correção"></textarea>
-                </div>
-                <div class="form-group alternativas-list" id="alternativas_group">
-                    <label>Alternativas:</label>
-                    <div id="alternativas">
-                        <div class="alternativa-item">
-                            <input type="text" name="alternativa" required placeholder="Alternativa">
-                            <label class="correta-label"><input type="checkbox" name="correta" value="0"> Correta</label>
-                            <button type="button" onclick="removerAlternativa(this)">Excluir</button>
-                        </div>
-                        <div class="alternativa-item">
-                            <input type="text" name="alternativa" required placeholder="Alternativa">
-                            <label class="correta-label"><input type="checkbox" name="correta" value="1"> Correta</label>
-                            <button type="button" onclick="removerAlternativa(this)">Excluir</button>
-                        </div>
-                    </div>
-                    <button type="button" onclick="addAlternativa()" class="btn btn-full">+ Adicionar Alternativa</button>
-                </div>
-                <button type="submit" class="btn btn-full">Adicionar Questão</button>
-                <a href="/gerar_link/{{ avaliacao_id }}" class="btn btn-finalizar"><span>Finalizar Avaliação e Gerar Link</span></a>
-            </form>
         </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Adicionar Questão</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-12">
+                            <label>Enunciado:</label>
+                            <textarea name="enunciado" required rows="6" placeholder="Digite o enunciado da questão..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <label>Suporte (texto opcional):</label>
+                            <textarea name="suporte_texto" id="suporte_texto" rows="6" placeholder="Digite o texto de apoio, se houver"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <label>Suporte (imagem opcional):</label>
+                            <div class="file-input-wrapper">
+                                <label class="file-input-label">Escolher Arquivo
+                                    <input type="file" name="suporte_imagem" accept="image/*" onchange="previewSuporteImagem(this)">
+                                </label>
+                                <span class="file-chosen" id="suporte-file-chosen">Nenhum arquivo escolhido</span>
+                            </div>
+                            <img id="suporte-preview-imagem" alt="Prévia da imagem de suporte" style="display:none; max-width:200px; margin-top:8px; border:1px solid #bcdffb; border-radius:4px;" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <label>Comando:</label>
+                            <input type="text" name="comando" placeholder="Ex: Assinale a alternativa correta" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Tipo de Questão:</label>
+                            <select name="tipo" id="tipo_questao" onchange="toggleTipoQuestao()" required>
+                                <option value="objetiva">Objetiva (Múltipla Escolha)</option>
+                                <option value="subjetiva">Subjetiva (Dissertativa)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Valor da Questão:</label>
+                            <input type="number" name="valor" step="0.01" min="0" required>
+                        </div>
+                    </div>
+
+                    <div class="row" id="resposta_correta_group" style="display:none;">
+                        <div class="col-12">
+                            <label>Resposta Esperada (opcional):</label>
+                            <textarea name="resposta_correta" rows="4" placeholder="Digite a resposta esperada para orientar a correção"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row alternativas-list" id="alternativas_group">
+                        <div class="col-12">
+                            <label>Alternativas:</label>
+                            <div id="alternativas">
+                                <div class="alternativa-item">
+                                    <input type="text" name="alternativa" required placeholder="Alternativa">
+                                    <label class="correta-label"><input type="checkbox" name="correta" value="0"> Correta</label>
+                                    <button type="button" onclick="removerAlternativa(this)">Excluir</button>
+                                </div>
+                                <div class="alternativa-item">
+                                    <input type="text" name="alternativa" required placeholder="Alternativa">
+                                    <label class="correta-label"><input type="checkbox" name="correta" value="1"> Correta</label>
+                                    <button type="button" onclick="removerAlternativa(this)">Excluir</button>
+                                </div>
+                            </div>
+                            <button type="button" onclick="addAlternativa()" class="btn btn-full">+ Adicionar Alternativa</button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn">Adicionar Questão</button>
+                        <a href="/gerar_link/{{ avaliacao_id }}" class="btn btn-secondary">Finalizar Avaliação e Gerar Link</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div class="questoes-list">
-            <h3 style="color:#1976d2;">Questões já adicionadas:</h3>
+            <h3>Questões já adicionadas:</h3>
             <ul style="padding-left:0;">
                 {% for q in questoes %}
                     <li class="questao-item">

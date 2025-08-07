@@ -11,6 +11,7 @@
         <div class="dashboard-header">
             <h2>Bem-vindo a esta plataforma, {{ nome_professor }}!</h2>
             <div class="dashboard-actions">
+                <a href="/trocar_senha/{{ professor_id }}" class="btn btn-success">Trocar Senha</a>
                 {% if session.get('is_admin') %}
                 <a href="/cadastrar_professor" class="btn">Cadastrar Professor</a>
                 {% endif %}
