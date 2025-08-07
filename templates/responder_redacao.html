@@ -29,6 +29,8 @@
                         {{ redacao.texto_apoio|safe }}
                     </div>
                 </div>
+                {% else %}
+                <!-- Debug: texto_apoio está vazio ou None -->
                 {% endif %}
 
                 {% if redacao.arquivo_apoio %}
@@ -48,6 +50,8 @@
                         {% endfor %}
                     </div>
                 </div>
+                {% else %}
+                <!-- Debug: arquivo_apoio está vazio ou None -->
                 {% endif %}
 
                 <form method="POST">
@@ -137,21 +141,44 @@
         const maxLinhas = {{ redacao.max_linhas }};
 
         function contarLinhas(texto) {
+            if (!texto.trim()) {
+                return 1; // Mínimo de 1 linha
+            }
+            
             // Criar um elemento temporário para calcular linhas reais
             const temp = document.createElement('div');
-            temp.style.cssText = window.getComputedStyle(textarea, null).cssText;
-            temp.style.height = 'auto';
-            temp.style.width = textarea.offsetWidth + 'px';
-            temp.style.position = 'absolute';
-            temp.style.visibility = 'hidden';
-            temp.style.whiteSpace = 'pre-wrap';
-            temp.style.wordWrap = 'break-word';
-            temp.style.overflow = 'hidden';
-            temp.innerHTML = texto.replace(/\n/g, '<br>');
+            
+            // Copiar todos os estilos do textarea
+            const textareaStyles = window.getComputedStyle(textarea);
+            
+            // Configurar o elemento temporário com os mesmos estilos do textarea
+            temp.style.cssText = `
+                position: absolute;
+                visibility: hidden;
+                height: auto;
+                width: ${textarea.offsetWidth}px;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                overflow: hidden;
+                padding: ${textareaStyles.padding};
+                border: ${textareaStyles.border};
+                font-family: ${textareaStyles.fontFamily};
+                font-size: ${textareaStyles.fontSize};
+                line-height: ${textareaStyles.lineHeight};
+                box-sizing: ${textareaStyles.boxSizing};
+                margin: ${textareaStyles.margin};
+            `;
+            
+            // Processar o texto para manter quebras de linha e espaços
+            const textoProcessado = texto.replace(/\n/g, '<br>');
+            temp.innerHTML = textoProcessado;
             
             document.body.appendChild(temp);
+            
+            // Calcular altura real
             const altura = temp.offsetHeight;
-            const alturaLinha = parseInt(window.getComputedStyle(textarea).lineHeight);
+            const alturaLinha = parseFloat(textareaStyles.lineHeight);
+            
             document.body.removeChild(temp);
             
             // Calcular número de linhas baseado na altura real
@@ -205,6 +232,16 @@
                     alert('Você atingiu o limite máximo de linhas!');
                 }
             }
+        });
+
+        // Atualizar contadores quando a janela for redimensionada
+        window.addEventListener('resize', function() {
+            setTimeout(atualizarContadores, 100); // Pequeno delay para garantir que o layout foi atualizado
+        });
+
+        // Atualizar contadores quando o DOM for carregado completamente
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(atualizarContadores, 100);
         });
 
         // Inicializar contadores

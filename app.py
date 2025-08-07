@@ -413,6 +413,8 @@ def nova_redacao(professor_id):
             max_linhas = int(request.form.get('max_linhas', 30))
             
             print(f"DEBUG: Dados recebidos - titulo: {titulo}, comando: {comando}, max_linhas: {max_linhas}")
+            print(f"DEBUG: texto_apoio: '{texto_apoio}'")
+            print(f"DEBUG: cabecalho: '{cabecalho}'")
             
             arquivos_apoio = []
             if 'arquivo_apoio' in request.files:
@@ -490,6 +492,15 @@ def responder_redacao(redacao_id):
     cur = conn.cursor()
     cur.execute('SELECT * FROM redacao WHERE id = ?', (redacao_id,))
     redacao = cur.fetchone()
+    
+    # Debug: verificar os dados da redação
+    print(f"DEBUG: Redação ID {redacao_id}")
+    if redacao:
+        print(f"DEBUG: texto_apoio: '{redacao.get('texto_apoio')}'")
+        print(f"DEBUG: arquivo_apoio: '{redacao.get('arquivo_apoio')}'")
+        print(f"DEBUG: comando: '{redacao.get('comando')}'")
+    else:
+        print(f"DEBUG: Redação {redacao_id} não encontrada")
     
     if request.method == 'POST':
         aluno_nome = request.form['aluno_nome']
