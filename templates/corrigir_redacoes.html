@@ -72,7 +72,7 @@
                     <div class="col-md-6">
                         <p><strong>Título:</strong> {{ redacao.titulo or 'Sem título' }}</p>
                         <p><strong>Criada em:</strong> {{ redacao.data_criacao if redacao.data_criacao else 'Data não disponível' }}</p>
-                        <p><strong>Máximo de linhas:</strong> {{ redacao.max_linhas }}</p>
+                        <p><strong>Sugestão de linhas:</strong> {{ redacao.max_linhas }}</p>
                     </div>
                     <div class="col-md-6">
                         {% if redacao.comando %}

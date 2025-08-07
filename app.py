@@ -443,11 +443,11 @@ def nova_redacao(professor_id):
             conn.commit()
             conn.close()
             print(f"DEBUG: Redação criada com ID: {redacao_id}")
-            flash('Redação criada com sucesso!')
+            flash('Redação criada com sucesso!', 'success')
             return redirect(url_for('gerar_link_redacao', redacao_id=redacao_id))
         except Exception as e:
             print(f"DEBUG: Erro ao criar redação: {e}")
-            flash(f'Erro ao criar redação: {str(e)}')
+            flash(f'Erro ao criar redação: {str(e)}', 'danger')
             return redirect(url_for('redacoes', professor_id=professor_id))
     
     return render_template('nova_redacao.html', professor_id=professor_id)
@@ -470,7 +470,7 @@ def gerar_link_redacao(redacao_id):
         
         if not redacao:
             print(f"DEBUG: Redação {redacao_id} não encontrada")
-            flash('Redação não encontrada!')
+            flash('Redação não encontrada!', 'danger')
             return redirect(url_for('index'))
         
         professor_id = redacao['professor_id']
@@ -503,7 +503,7 @@ def responder_redacao(redacao_id):
         else:
             print(f"DEBUG: Redação {redacao_id} não encontrada")
             conn.close()
-            flash('Redação não encontrada!')
+            flash('Redação não encontrada!', 'danger')
             return redirect(url_for('index'))
         
         if request.method == 'POST':
@@ -520,7 +520,7 @@ def responder_redacao(redacao_id):
                         (redacao_id, aluno_nome, escola, turma, serie, componente, professor_nome, texto_redacao, titulo_redacao, datetime.now()))
             conn.commit()
             conn.close()
-            flash('Redação enviada com sucesso!')
+            flash('Redação enviada com sucesso!', 'success')
             return redirect(url_for('redacao_enviada'))
         
         conn.close()
@@ -529,7 +529,7 @@ def responder_redacao(redacao_id):
         print(f"Erro na rota responder_redacao: {e}")
         import traceback
         traceback.print_exc()
-        flash('Erro interno do servidor. Tente novamente.')
+        flash('Erro interno do servidor. Tente novamente.', 'danger')
         return redirect(url_for('index'))
 
 @app.route('/redacao_enviada')
@@ -581,7 +581,7 @@ def excluir_redacao(redacao_id):
     row = cur.fetchone()
     if not row:
         conn.close()
-        flash('Redação não encontrada!')
+        flash('Redação não encontrada!', 'danger')
         return redirect(url_for('index'))
     professor_id = row['professor_id']
     
@@ -589,7 +589,7 @@ def excluir_redacao(redacao_id):
     cur.execute('DELETE FROM redacao WHERE id = ?', (redacao_id,))
     conn.commit()
     conn.close()
-    flash('Redação excluída com sucesso!')
+    flash('Redação excluída com sucesso!', 'success')
     return redirect(url_for('redacoes', professor_id=professor_id))
 
 # Criar nova avaliação
@@ -646,7 +646,7 @@ def adicionar_questoes(avaliacao_id):
         
         conn.commit()
         conn.close()
-        flash('Questão adicionada!')
+        flash('Questão adicionada!', 'success')
     # Buscar questões já adicionadas
     conn = get_db()
     cur = conn.cursor()
@@ -703,7 +703,7 @@ def responder_avaliacao(avaliacao_id):
                                 (resposta_id, q['id'], resposta_texto))
         conn.commit()
         conn.close()
-        flash('Respostas enviadas com sucesso!')
+        flash('Respostas enviadas com sucesso!', 'success')
         return redirect(url_for('resposta_enviada'))
     conn.close()
     return render_template('responder_avaliacao.html', avaliacao=avaliacao, questoes=questoes_com_alternativas)
@@ -777,7 +777,7 @@ def excluir_avaliacao(avaliacao_id):
     cur.execute('DELETE FROM avaliacao WHERE id = ?', (avaliacao_id,))
     conn.commit()
     conn.close()
-    flash('Avaliação excluída com sucesso!')
+    flash('Avaliação excluída com sucesso!', 'success')
     return redirect(url_for('dashboard', professor_id=professor_id))
 
 @app.route('/resposta/<int:resposta_id>')
@@ -810,7 +810,7 @@ def resposta_detalhe(resposta_id):
 def cadastrar_professor():
     # Só permite acesso se for admin
     if not session.get('is_admin'):
-        flash('Acesso restrito ao administrador!')
+        flash('Acesso restrito ao administrador!', 'danger')
         return redirect(url_for('index'))
     if request.method == 'POST':
         nome = request.form['nome']
@@ -821,12 +821,12 @@ def cadastrar_professor():
         cur.execute('SELECT * FROM professor WHERE email = ?', (email,))
         if cur.fetchone():
             conn.close()
-            flash('Já existe um professor com este email!')
+            flash('Já existe um professor com este email!', 'danger')
             return render_template('cadastrar_professor.html')
         cur.execute('INSERT INTO professor (nome, email, senha) VALUES (?, ?, ?)', (nome, email, senha))
         conn.commit()
         conn.close()
-        flash('Professor cadastrado com sucesso!')
+        flash('Professor cadastrado com sucesso!', 'success')
         return redirect(url_for('cadastrar_professor'))
     return render_template('cadastrar_professor.html')
 
@@ -840,13 +840,13 @@ def excluir_questao(questao_id, avaliacao_id):
     cur.execute('DELETE FROM questao WHERE id = ?', (questao_id,))
     conn.commit()
     conn.close()
-    flash('Questão excluída com sucesso!')
+    flash('Questão excluída com sucesso!', 'success')
     return redirect(url_for('adicionar_questoes', avaliacao_id=avaliacao_id))
 
 @app.route('/resetar_senha/<int:professor_id>', methods=['POST'])
 def resetar_senha(professor_id):
     if not session.get('is_admin'):
-        flash('Acesso restrito ao administrador!')
+        flash('Acesso restrito ao administrador!', 'danger')
         return redirect(url_for('index'))
     conn = get_db()
     cur = conn.cursor()
@@ -860,13 +860,13 @@ def resetar_senha(professor_id):
     cur.execute('UPDATE professor SET senha = ? WHERE id = ?', ('123456', professor_id))
     conn.commit()
     conn.close()
-    flash('Senha resetada para 123456 com sucesso!')
+    flash('Senha resetada para 123456 com sucesso!', 'success')
     return redirect(url_for('dashboard', professor_id=session.get('professor_id')))
 
 @app.route('/excluir_professor/<int:professor_id>', methods=['POST'])
 def excluir_professor(professor_id):
     if not session.get('is_admin'):
-        flash('Acesso restrito ao administrador!')
+        flash('Acesso restrito ao administrador!', 'danger')
         return redirect(url_for('index'))
     conn = get_db()
     cur = conn.cursor()
@@ -880,7 +880,7 @@ def excluir_professor(professor_id):
     cur.execute('DELETE FROM professor WHERE id = ?', (professor_id,))
     conn.commit()
     conn.close()
-    flash('Professor excluído com sucesso!')
+    flash('Professor excluído com sucesso!', 'success')
     return redirect(url_for('dashboard', professor_id=session.get('professor_id')))
 
 @app.route('/visualizar_avaliacao/<int:avaliacao_id>')
@@ -959,7 +959,7 @@ def marcar_correta(resposta_questao_id):
     cur.execute('UPDATE resposta_questao SET corrigida = 1, correta = 1 WHERE id = ?', (resposta_questao_id,))
     conn.commit()
     conn.close()
-    flash('Resposta marcada como correta!')
+    flash('Resposta marcada como correta!', 'success')
     return redirect(request.referrer)
 
 @app.route('/marcar_incorreta/<int:resposta_questao_id>', methods=['POST'])
@@ -969,7 +969,7 @@ def marcar_incorreta(resposta_questao_id):
     cur.execute('UPDATE resposta_questao SET corrigida = 1, correta = 0 WHERE id = ?', (resposta_questao_id,))
     conn.commit()
     conn.close()
-    flash('Resposta marcada como incorreta!')
+    flash('Resposta marcada como incorreta!', 'success')
     return redirect(request.referrer)
 
 @app.route('/analise_questoes/<int:avaliacao_id>')

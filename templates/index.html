@@ -191,13 +191,13 @@
         <div style="text-align:center; font-size:1.25em; color:#1976d2; margin-bottom:18px; font-weight:500;">Sua avaliação conectada ao futuro.</div>
         <div class="login-container">
             <h2 style="text-align:center; color:#1976d2;">Login do Professor</h2>
-            {% with messages = get_flashed_messages() %}
+            {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
-                <ul class="flash">
-                  {% for message in messages %}
-                    <li>{{ message }}</li>
-                  {% endfor %}
-                </ul>
+                {% for category, message in messages %}
+                  <div class="flash {% if category == 'success' %}success{% elif category == 'danger' %}danger{% else %}info{% endif %}">
+                    {{ message }}
+                  </div>
+                {% endfor %}
               {% endif %}
             {% endwith %}
             <form method="POST">

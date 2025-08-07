@@ -99,20 +99,11 @@
                                    placeholder="Digite o título da sua redação (opcional)...">
                         </div>
 
-                        <div class="contador-linhas">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-muted">
-                                    <i class="fas fa-ruler"></i> 
-                                    Linhas: <span id="contador-linhas">0</span> / {{ redacao.max_linhas }}
-                                </span>
-                                <span class="text-muted">
-                                    <i class="fas fa-font"></i> 
-                                    Caracteres: <span id="contador-caracteres">0</span>
-                                </span>
-                            </div>
-                            <div class="progress">
-                                <div class="progress-bar" id="progresso-linhas" role="progressbar" style="width: 0%"></div>
-                            </div>
+                        <div class="info-linhas">
+                            <p class="text-muted mb-2">
+                                <i class="fas fa-info-circle"></i> 
+                                Sugestão: {{ redacao.max_linhas }} linhas
+                            </p>
                         </div>
                         <textarea class="texto-redacao" id="texto_redacao" name="texto_redacao" 
                             placeholder="Digite sua redação aqui..." required></textarea>
@@ -133,119 +124,12 @@
 
     <script src="https://kit.fontawesome.com/your-fontawesome-kit.js"></script>
     <script>
-        const textarea = document.getElementById('texto_redacao');
-        const contadorLinhas = document.getElementById('contador-linhas');
-        const contadorCaracteres = document.getElementById('contador-caracteres');
-        const progressoLinhas = document.getElementById('progresso-linhas');
-        const btnEnviar = document.getElementById('btn-enviar');
-        const maxLinhas = {{ redacao.max_linhas }};
-
-        function contarLinhas(texto) {
-            if (!texto.trim()) {
-                return 1; // Mínimo de 1 linha
-            }
-            
-            // Criar um elemento temporário para calcular linhas reais
-            const temp = document.createElement('div');
-            
-            // Copiar todos os estilos do textarea
-            const textareaStyles = window.getComputedStyle(textarea);
-            
-            // Configurar o elemento temporário com os mesmos estilos do textarea
-            temp.style.cssText = `
-                position: absolute;
-                visibility: hidden;
-                height: auto;
-                width: ${textarea.offsetWidth}px;
-                white-space: pre-wrap;
-                word-wrap: break-word;
-                overflow: hidden;
-                padding: ${textareaStyles.padding};
-                border: ${textareaStyles.border};
-                font-family: ${textareaStyles.fontFamily};
-                font-size: ${textareaStyles.fontSize};
-                line-height: ${textareaStyles.lineHeight};
-                box-sizing: ${textareaStyles.boxSizing};
-                margin: ${textareaStyles.margin};
-            `;
-            
-            // Processar o texto para manter quebras de linha e espaços
-            const textoProcessado = texto.replace(/\n/g, '<br>');
-            temp.innerHTML = textoProcessado;
-            
-            document.body.appendChild(temp);
-            
-            // Calcular altura real
-            const altura = temp.offsetHeight;
-            const alturaLinha = parseFloat(textareaStyles.lineHeight);
-            
-            document.body.removeChild(temp);
-            
-            // Calcular número de linhas baseado na altura real
-            const linhas = Math.ceil(altura / alturaLinha);
-            return Math.max(1, linhas); // Mínimo de 1 linha
-        }
-
-        function atualizarContadores() {
-            const texto = textarea.value;
-            const linhas = contarLinhas(texto);
-            const caracteres = texto.length;
-
-            contadorLinhas.textContent = linhas;
-            contadorCaracteres.textContent = caracteres;
-
-            const percentual = Math.min((linhas / maxLinhas) * 100, 100);
-            progressoLinhas.style.width = percentual + '%';
-
-            if (linhas > maxLinhas) {
-                progressoLinhas.classList.remove('bg-success', 'bg-warning');
-                progressoLinhas.classList.add('bg-danger');
-                btnEnviar.disabled = true;
-                btnEnviar.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Limite Excedido';
-            } else if (linhas > maxLinhas * 0.8) {
-                progressoLinhas.classList.remove('bg-success', 'bg-danger');
-                progressoLinhas.classList.add('bg-warning');
-                btnEnviar.disabled = false;
-                btnEnviar.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Redação';
-            } else {
-                progressoLinhas.classList.remove('bg-warning', 'bg-danger');
-                progressoLinhas.classList.add('bg-success');
-                btnEnviar.disabled = false;
-                btnEnviar.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Redação';
-            }
-        }
-
         function limparTexto() {
             if (confirm('Tem certeza que deseja limpar todo o texto? Esta ação não pode ser desfeita.')) {
-                textarea.value = '';
+                document.getElementById('texto_redacao').value = '';
                 document.getElementById('titulo_redacao').value = '';
-                atualizarContadores();
             }
         }
-
-        textarea.addEventListener('input', atualizarContadores);
-        textarea.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                const linhas = contarLinhas(textarea.value);
-                if (linhas >= maxLinhas) {
-                    e.preventDefault();
-                    alert('Você atingiu o limite máximo de linhas!');
-                }
-            }
-        });
-
-        // Atualizar contadores quando a janela for redimensionada
-        window.addEventListener('resize', function() {
-            setTimeout(atualizarContadores, 100); // Pequeno delay para garantir que o layout foi atualizado
-        });
-
-        // Atualizar contadores quando o DOM for carregado completamente
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(atualizarContadores, 100);
-        });
-
-        // Inicializar contadores
-        atualizarContadores();
     </script>
 </body>
 </html> 
