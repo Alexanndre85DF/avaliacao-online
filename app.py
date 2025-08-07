@@ -488,39 +488,49 @@ def gerar_link_redacao(redacao_id):
 
 @app.route('/responder_redacao/<int:redacao_id>', methods=['GET', 'POST'])
 def responder_redacao(redacao_id):
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute('SELECT * FROM redacao WHERE id = ?', (redacao_id,))
-    redacao = cur.fetchone()
-    
-    # Debug: verificar os dados da redação
-    print(f"DEBUG: Redação ID {redacao_id}")
-    if redacao:
-        print(f"DEBUG: texto_apoio: '{redacao.get('texto_apoio')}'")
-        print(f"DEBUG: arquivo_apoio: '{redacao.get('arquivo_apoio')}'")
-        print(f"DEBUG: comando: '{redacao.get('comando')}'")
-    else:
-        print(f"DEBUG: Redação {redacao_id} não encontrada")
-    
-    if request.method == 'POST':
-        aluno_nome = request.form['aluno_nome']
-        escola = request.form['escola']
-        turma = request.form['turma']
-        serie = request.form['serie']
-        componente = request.form['componente']
-        professor_nome = request.form['professor_nome']
-        texto_redacao = request.form['texto_redacao']
-        titulo_redacao = request.form.get('titulo_redacao', '')
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM redacao WHERE id = ?', (redacao_id,))
+        redacao = cur.fetchone()
         
-        cur.execute('INSERT INTO resposta_redacao (redacao_id, aluno_nome, escola, turma, serie, componente, professor_nome, texto_redacao, titulo_redacao, data_envio) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                    (redacao_id, aluno_nome, escola, turma, serie, componente, professor_nome, texto_redacao, titulo_redacao, datetime.now()))
-        conn.commit()
+        # Debug: verificar os dados da redação
+        print(f"DEBUG: Redação ID {redacao_id}")
+        if redacao:
+            print(f"DEBUG: texto_apoio: '{redacao['texto_apoio']}'")
+            print(f"DEBUG: arquivo_apoio: '{redacao['arquivo_apoio']}'")
+            print(f"DEBUG: comando: '{redacao['comando']}'")
+        else:
+            print(f"DEBUG: Redação {redacao_id} não encontrada")
+            conn.close()
+            flash('Redação não encontrada!')
+            return redirect(url_for('index'))
+        
+        if request.method == 'POST':
+            aluno_nome = request.form['aluno_nome']
+            escola = request.form['escola']
+            turma = request.form['turma']
+            serie = request.form['serie']
+            componente = request.form['componente']
+            professor_nome = request.form['professor_nome']
+            texto_redacao = request.form['texto_redacao']
+            titulo_redacao = request.form.get('titulo_redacao', '')
+            
+            cur.execute('INSERT INTO resposta_redacao (redacao_id, aluno_nome, escola, turma, serie, componente, professor_nome, texto_redacao, titulo_redacao, data_envio) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                        (redacao_id, aluno_nome, escola, turma, serie, componente, professor_nome, texto_redacao, titulo_redacao, datetime.now()))
+            conn.commit()
+            conn.close()
+            flash('Redação enviada com sucesso!')
+            return redirect(url_for('redacao_enviada'))
+        
         conn.close()
-        flash('Redação enviada com sucesso!')
-        return redirect(url_for('redacao_enviada'))
-    
-    conn.close()
-    return render_template('responder_redacao.html', redacao=redacao)
+        return render_template('responder_redacao.html', redacao=redacao)
+    except Exception as e:
+        print(f"Erro na rota responder_redacao: {e}")
+        import traceback
+        traceback.print_exc()
+        flash('Erro interno do servidor. Tente novamente.')
+        return redirect(url_for('index'))
 
 @app.route('/redacao_enviada')
 def redacao_enviada():
