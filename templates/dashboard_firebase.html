@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>TesteOn - Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e0e0e0;
+    }
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #1976d2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+    }
+    .user-details h3 {
+        margin: 0;
+        color: #333;
+    }
+    .user-details p {
+        margin: 0;
+        color: #666;
+        font-size: 0.9em;
+    }
+    .logout-btn {
+        background: #f44336;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9em;
+    }
+    .logout-btn:hover {
+        background: #d32f2f;
+    }
+    .admin-badge {
+        background: #ff9800;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        margin-left: 10px;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    .stat-number {
+        font-size: 2em;
+        font-weight: bold;
+        color: #1976d2;
+        margin-bottom: 5px;
+    }
+    .stat-label {
+        color: #666;
+        font-size: 0.9em;
+    }
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    .action-card {
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: transform 0.2s;
+    }
+    .action-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    .action-icon {
+        font-size: 3em;
+        margin-bottom: 15px;
+    }
+    .action-title {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    .action-description {
+        color: #666;
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+    .action-btn {
+        background: #1976d2;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1em;
+        transition: background 0.2s;
+    }
+    .action-btn:hover {
+        background: #125ea7;
+    }
+    .recent-section {
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .section-title {
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 10px;
+    }
+    .recent-list {
+        list-style: none;
+        padding: 0;
+    }
+    .recent-item {
+        padding: 15px 0;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .recent-item:last-child {
+        border-bottom: none;
+    }
+    .recent-title {
+        font-weight: 500;
+        color: #333;
+    }
+    .recent-date {
+        color: #666;
+        font-size: 0.9em;
+    }
+    .loading {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+    .error {
+        background: #ffebee;
+        color: #d32f2f;
+        padding: 15px;
+        border-radius: 4px;
+        margin: 20px 0;
+    }
+    @media (max-width: 768px) {
+        .header {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        .actions-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <div class="user-info">
+                <div class="user-avatar" id="user-avatar">U</div>
+                <div class="user-details">
+                    <h3 id="user-name">Carregando...</h3>
+                    <p id="user-email">carregando@email.com</p>
+                    <span id="admin-badge" class="admin-badge" style="display: none;">Admin</span>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+
+        <div id="loading" class="loading">
+            <p>Carregando dashboard...</p>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="dashboard-content" style="display: none;">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-avaliacoes">0</div>
+                    <div class="stat-label">Avaliações</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-redacoes">0</div>
+                    <div class="stat-label">Redações</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-respostas">0</div>
+                    <div class="stat-label">Respostas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-usuarios">0</div>
+                    <div class="stat-label">Usuários</div>
+                </div>
+            </div>
+
+            <div class="actions-grid">
+                <div class="action-card">
+                    <div class="action-icon">📝</div>
+                    <div class="action-title">Nova Avaliação</div>
+                    <div class="action-description">Crie uma nova avaliação objetiva ou subjetiva para seus alunos</div>
+                    <button class="action-btn" onclick="criarAvaliacao()">Criar Avaliação</button>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">✍️</div>
+                    <div class="action-title">Nova Redação</div>
+                    <div class="action-description">Crie uma redação seguindo os critérios do ENEM</div>
+                    <button class="action-btn" onclick="criarRedacao()">Criar Redação</button>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">📊</div>
+                    <div class="action-title">Ver Resultados</div>
+                    <div class="action-description">Visualize os resultados e gráficos de desempenho</div>
+                    <button class="action-btn" onclick="verResultados()">Ver Resultados</button>
+                </div>
+                <div class="action-card" id="admin-card" style="display: none;">
+                    <div class="action-icon">👥</div>
+                    <div class="action-title">Gerenciar Usuários</div>
+                    <div class="action-description">Gerencie usuários e permissões do sistema</div>
+                    <button class="action-btn" onclick="gerenciarUsuarios()">Gerenciar</button>
+                </div>
+            </div>
+
+            <div class="recent-section">
+                <div class="section-title">Avaliações Recentes</div>
+                <ul class="recent-list" id="avaliacoes-recentes">
+                    <li class="recent-item">
+                        <span class="recent-title">Carregando...</span>
+                        <span class="recent-date">-</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="recent-section">
+                <div class="section-title">Redações Recentes</div>
+                <ul class="recent-list" id="redacoes-recentes">
+                    <li class="recent-item">
+                        <span class="recent-title">Carregando...</span>
+                        <span class="recent-date">-</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Verificar autenticação
+    function checkAuth() {
+        fetch('/api/auth/check', {
+            method: 'GET',
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Não autenticado');
+            }
+            return response.json();
+        })
+        .then(data => {
+            loadDashboard();
+        })
+        .catch(error => {
+            window.location.href = '/';
+        });
+    }
+
+    // Carregar dados do dashboard
+    function loadDashboard() {
+        Promise.all([
+            loadUserInfo(),
+            loadStats(),
+            loadRecentAvaliacoes(),
+            loadRecentRedacoes()
+        ]).then(() => {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dashboard-content').style.display = 'block';
+        }).catch(error => {
+            console.error('Erro ao carregar dashboard:', error);
+            document.getElementById('error').textContent = 'Erro ao carregar dados. Tente novamente.';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
+        });
+    }
+
+    // Carregar informações do usuário
+    function loadUserInfo() {
+        return fetch('/api/auth/user', {
+            method: 'GET',
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+            const user = data.user;
+            document.getElementById('user-name').textContent = user.name || 'Usuário';
+            document.getElementById('user-email').textContent = user.email || '';
+            
+            // Avatar com inicial do nome
+            const avatar = document.getElementById('user-avatar');
+            avatar.textContent = (user.name || 'U').charAt(0).toUpperCase();
+            
+            // Mostrar badge de admin se for admin
+            if (user.is_admin) {
+                document.getElementById('admin-badge').style.display = 'inline';
+                document.getElementById('admin-card').style.display = 'block';
+            }
+        });
+    }
+
+    // Carregar estatísticas
+    function loadStats() {
+        return Promise.all([
+            fetch('/api/avaliacoes', { credentials: 'same-origin' }).then(r => r.json()),
+            fetch('/api/redacoes', { credentials: 'same-origin' }).then(r => r.json()),
+            fetch('/api/stats', { credentials: 'same-origin' }).then(r => r.json())
+        ]).then(([avaliacoes, redacoes, stats]) => {
+            document.getElementById('total-avaliacoes').textContent = avaliacoes.avaliacoes?.length || 0;
+            document.getElementById('total-redacoes').textContent = redacoes.redacoes?.length || 0;
+            document.getElementById('total-respostas').textContent = stats.total_respostas || 0;
+            document.getElementById('total-usuarios').textContent = stats.total_usuarios || 0;
+        });
+    }
+
+    // Carregar avaliações recentes
+    function loadRecentAvaliacoes() {
+        return fetch('/api/avaliacoes?limit=5', { credentials: 'same-origin' })
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('avaliacoes-recentes');
+            container.innerHTML = '';
+            
+            if (data.avaliacoes && data.avaliacoes.length > 0) {
+                data.avaliacoes.forEach(avaliacao => {
+                    const li = document.createElement('li');
+                    li.className = 'recent-item';
+                    li.innerHTML = `
+                        <span class="recent-title">${avaliacao.titulo}</span>
+                        <span class="recent-date">${formatDate(avaliacao.created_at)}</span>
+                    `;
+                    container.appendChild(li);
+                });
+            } else {
+                container.innerHTML = '<li class="recent-item"><span class="recent-title">Nenhuma avaliação criada</span></li>';
+            }
+        });
+    }
+
+    // Carregar redações recentes
+    function loadRecentRedacoes() {
+        return fetch('/api/redacoes?limit=5', { credentials: 'same-origin' })
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('redacoes-recentes');
+            container.innerHTML = '';
+            
+            if (data.redacoes && data.redacoes.length > 0) {
+                data.redacoes.forEach(redacao => {
+                    const li = document.createElement('li');
+                    li.className = 'recent-item';
+                    li.innerHTML = `
+                        <span class="recent-title">${redacao.titulo}</span>
+                        <span class="recent-date">${formatDate(redacao.created_at)}</span>
+                    `;
+                    container.appendChild(li);
+                });
+            } else {
+                container.innerHTML = '<li class="recent-item"><span class="recent-title">Nenhuma redação criada</span></li>';
+            }
+        });
+    }
+
+    // Funções de ação
+    function criarAvaliacao() {
+        // Implementar criação de avaliação
+        alert('Funcionalidade de criar avaliação será implementada');
+    }
+
+    function criarRedacao() {
+        // Implementar criação de redação
+        alert('Funcionalidade de criar redação será implementada');
+    }
+
+    function verResultados() {
+        // Implementar visualização de resultados
+        alert('Funcionalidade de ver resultados será implementada');
+    }
+
+    function gerenciarUsuarios() {
+        // Implementar gerenciamento de usuários
+        alert('Funcionalidade de gerenciar usuários será implementada');
+    }
+
+    function logout() {
+        fetch('/api/auth/logout', {
+            method: 'POST',
+            credentials: 'same-origin'
+        })
+        .then(() => {
+            window.location.href = '/';
+        })
+        .catch(error => {
+            console.error('Erro no logout:', error);
+            window.location.href = '/';
+        });
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('pt-BR');
+    }
+
+    // Inicializar dashboard
+    checkAuth();
+    </script>
+</body>
+</html> 

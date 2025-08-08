@@ -1,0 +1,101 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Função para verificar se usuário está autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Função para verificar se usuário é admin
+    function isAdmin() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.is_admin == true;
+    }
+    
+    // Função para verificar se usuário é dono do documento
+    function isOwner(ownerId) {
+      return isAuthenticated() && request.auth.uid == ownerId;
+    }
+    
+    // Função para verificar se usuário pode acessar (dono ou admin)
+    function canAccess(ownerId) {
+      return isOwner(ownerId) || isAdmin();
+    }
+    
+    // Coleção de usuários
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+    }
+    
+    // Coleção de avaliações
+    match /avaliacoes/{avaliacaoId} {
+      allow read, write: if canAccess(resource.data.ownerId);
+      allow create: if isAuthenticated();
+    }
+    
+    // Coleção de questões
+    match /questoes/{questaoId} {
+      allow read, write: if isAuthenticated() && (
+        isAdmin() || 
+        exists(/databases/$(database)/documents/avaliacoes/$(resource.data.avaliacaoId)) &&
+        canAccess(get(/databases/$(database)/documents/avaliacoes/$(resource.data.avaliacaoId)).data.ownerId)
+      );
+      allow create: if isAuthenticated();
+    }
+    
+    // Coleção de alternativas
+    match /alternativas/{alternativaId} {
+      allow read, write: if isAuthenticated() && (
+        isAdmin() || 
+        exists(/databases/$(database)/documents/questoes/$(resource.data.questaoId)) &&
+        exists(/databases/$(database)/documents/avaliacoes/$(get(/databases/$(database)/documents/questoes/$(resource.data.questaoId)).data.avaliacaoId)) &&
+        canAccess(get(/databases/$(database)/documents/avaliacoes/$(get(/databases/$(database)/documents/questoes/$(resource.data.questaoId)).data.avaliacaoId)).data.ownerId)
+      );
+      allow create: if isAuthenticated();
+    }
+    
+    // Coleção de respostas
+    match /respostas/{respostaId} {
+      allow read, write: if isAuthenticated() && (
+        isAdmin() || 
+        exists(/databases/$(database)/documents/avaliacoes/$(resource.data.avaliacaoId)) &&
+        canAccess(get(/databases/$(database)/documents/avaliacoes/$(resource.data.avaliacaoId)).data.ownerId)
+      );
+      allow create: if isAuthenticated();
+    }
+    
+    // Coleção de respostas de questões
+    match /respostas_questoes/{respostaQuestaoId} {
+      allow read, write: if isAuthenticated() && (
+        isAdmin() || 
+        exists(/databases/$(database)/documents/respostas/$(resource.data.respostaId)) &&
+        exists(/databases/$(database)/documents/avaliacoes/$(get(/databases/$(database)/documents/respostas/$(resource.data.respostaId)).data.avaliacaoId)) &&
+        canAccess(get(/databases/$(database)/documents/avaliacoes/$(get(/databases/$(database)/documents/respostas/$(resource.data.respostaId)).data.avaliacaoId)).data.ownerId)
+      );
+      allow create: if isAuthenticated();
+    }
+    
+    // Coleção de redações
+    match /redacoes/{redacaoId} {
+      allow read, write: if canAccess(resource.data.ownerId);
+      allow create: if isAuthenticated();
+    }
+    
+    // Coleção de respostas de redações
+    match /respostas_redacao/{respostaRedacaoId} {
+      allow read, write: if isAuthenticated() && (
+        isAdmin() || 
+        exists(/databases/$(database)/documents/redacoes/$(resource.data.redacaoId)) &&
+        canAccess(get(/databases/$(database)/documents/redacoes/$(resource.data.redacaoId)).data.ownerId)
+      );
+      allow create: if isAuthenticated();
+    }
+    
+    // Regra padrão: negar acesso a todas as outras coleções
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+} 
