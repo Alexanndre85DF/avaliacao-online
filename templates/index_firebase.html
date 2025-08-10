@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>TesteOn - Login</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+    .titulo-testeon {
+        font-size: 3em;
+        font-weight: bold;
+        color: #1976d2;
+        letter-spacing: 2px;
+        text-shadow: 1px 2px 8px #bcdffb;
+        margin-bottom: 0.2em;
+    }
+    .slogan {
+        text-align: center;
+        font-size: 1.25em;
+        color: #333;
+        margin-bottom: 2.2em;
+        font-weight: 400;
+    }
+    .login-container {
+        margin-top: 1.5em;
+    }
+    .descricao-plataforma {
+        text-align: center;
+        color: #6a7680;
+        font-size: 1.08em;
+        margin: 32px 0 0 0;
+    }
+    .rodape-institucional {
+        margin: 16px auto 0 auto;
+        text-align: center;
+        color: #6a7680;
+        font-size: 0.98em;
+        max-width: 420px;
+        padding: 0 10px;
+        line-height: 1.5em;
+    }
+    .form-login {
+        max-width:280px;
+        margin:0 auto;
+    }
+    .btn-google-login {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-width: 280px;
+        margin: 18px auto 0 auto;
+        background: #fff;
+        color: #333;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 12px 16px;
+        font-size: 1em;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .btn-google-login:hover {
+        background: #f8f9fa;
+        border-color: #c1c1c1;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .btn-google-login img {
+        width: 18px;
+        height: 18px;
+        margin-right: 8px;
+    }
+    .loading {
+        display: none;
+        text-align: center;
+        margin: 20px 0;
+    }
+    .error-message {
+        color: #d32f2f;
+        background: #ffebee;
+        padding: 10px;
+        border-radius: 4px;
+        margin: 10px 0;
+        display: none;
+    }
+    /* Botão Quem Somos */
+    .quem-somos-btn {
+        position: fixed;
+        top: 24px;
+        left: 32px;
+        background: #1976d2;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 22px;
+        font-size: 1em;
+        font-weight: 500;
+        cursor: pointer;
+        z-index: 1001;
+        box-shadow: 0 2px 8px #bcdffb;
+        transition: background 0.2s;
+    }
+    .quem-somos-btn:hover { background: #125ea7; }
+    /* Modal */
+    .modal-quem-somos {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.35);
+    }
+    .modal-content-quem-somos {
+        background-color: #fff;
+        margin: 5% auto;
+        padding: 32px 28px;
+        border-radius: 8px;
+        max-width: 720px;
+        width: 90%;
+        box-shadow: 0 4px 24px #bcdffb;
+        position: relative;
+        font-size: 1.08em;
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+    
+    @media (max-width: 768px) {
+        .modal-content-quem-somos {
+            width: 95%;
+            margin: 2% auto;
+            padding: 20px 16px;
+            font-size: 1em;
+        }
+    }
+    .close-quem-somos {
+        color: #1976d2;
+        position: absolute;
+        top: 12px;
+        right: 18px;
+        font-size: 1.7em;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .close-quem-somos:hover { color: #125ea7; }
+    </style>
+    <script>
+    function abrirQuemSomos() {
+        document.getElementById('modalQuemSomos').style.display = 'block';
+    }
+    function fecharQuemSomos() {
+        document.getElementById('modalQuemSomos').style.display = 'none';
+    }
+    window.onclick = function(event) {
+        var modal = document.getElementById('modalQuemSomos');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+    </script>
+</head>
+<body>
+    <button class="quem-somos-btn" onclick="abrirQuemSomos()">Quem Somos</button>
+    <div id="modalQuemSomos" class="modal-quem-somos">
+        <div class="modal-content-quem-somos">
+            <span class="close-quem-somos" onclick="fecharQuemSomos()">&times;</span>
+            <h2 style="color:#1976d2; text-align:center; margin-bottom:18px;">Quem Somos</h2>
+            <p style="text-align:justify;">
+                <b>Bem-vindo ao TesteOn – Sua Avaliação Conectada ao Futuro.</b><br><br>
+                O TesteOn é uma plataforma criada por Alexandre Tolentino, educador com longa experiência em sala de aula, que conhece de perto os desafios enfrentados pelos professores no dia a dia: falta de tempo, sobrecarga de trabalho e a necessidade constante de avaliar os estudantes com qualidade.<br><br>
+                Inspirado por essa realidade, Alexandre desenvolveu o TesteOn com o objetivo de proporcionar mais autonomia, agilidade e eficiência ao trabalho docente, usando a tecnologia como aliada da aprendizagem.<br><br>
+                Com o avanço tecnológico e o impacto das mudanças digitais em todas as áreas da sociedade, a escola também precisa se adaptar. O uso de recursos tecnológicos na educação já não é uma tendência — é uma necessidade. Nesse contexto, a avaliação online surge como uma solução moderna e eficaz.<br><br>
+                Ao aplicar provas e simulados diretamente nos computadores das unidades escolares, o professor otimiza seu tempo, evita a correção manual e ainda estimula o interesse dos estudantes, que já estão naturalmente conectados ao universo digital. O uso da tecnologia aumenta o engajamento, tornando o processo avaliativo mais dinâmico, acessível e atual.<br><br>
+                Além disso, a plataforma contribui para a economicidade nas escolas, reduzindo a necessidade de impressões em massa e promovendo uma educação mais sustentável.<br><br>
+                O TesteOn foi estruturado com base em modelos de avaliações externas, como o SAEB, permitindo que os professores criem simulados alinhados aos descritores cobrados nas provas nacionais, fortalecendo a aprendizagem e apoiando o trabalho pedagógico em sala.<br><br>
+                <b>🎯 Tipos de Avaliação Disponíveis:</b><br><br>
+                <b>📝 Provas Objetivas:</b> Questões de múltipla escolha com correção automática instantânea.<br><br>
+                <b>✍️ Provas Subjetivas:</b> Questões discursivas que permitem aos alunos desenvolverem respostas detalhadas, com ferramentas de correção manual pelo professor.<br><br>
+                <b>📚 Redações ENEM:</b> Sistema especializado para criação e correção de redações seguindo a estrutura de pontuação do ENEM, incluindo as cinco competências avaliadas no exame nacional:<br>
+                <ul style="margin-left:18px; margin-top:8px;">
+                    <li><b>Competência 1:</b> Domínio da norma culta da língua escrita</li>
+                    <li><b>Competência 2:</b> Compreensão da proposta e aplicação de conceitos</li>
+                    <li><b>Competência 3:</b> Capacidade de selecionar, relacionar e organizar informações</li>
+                    <li><b>Competência 4:</b> Conhecimento dos mecanismos linguísticos para argumentação</li>
+                    <li><b>Competência 5:</b> Elaboração de proposta de intervenção para o problema abordado</li>
+                </ul><br>
+                Com o TesteOn, você pode:<br>
+                <ul style="margin-left:18px;">
+                    <li>Criar provas objetivas, subjetivas e redações com facilidade e rapidez;</li>
+                    <li>Aplicar avaliações digitais com correção automática para questões objetivas;</li>
+                    <li>Corrigir questões subjetivas e redações com critérios personalizados;</li>
+                    <li>Avaliar redações seguindo rigorosamente os critérios do ENEM;</li>
+                    <li>Receber resultados e gráficos de desempenho instantaneamente;</li>
+                    <li>Trabalhar com mais estratégia, menos sobrecarga e maior impacto na aprendizagem.</li>
+                </ul>
+                <b>📬 Fale com o idealizador</b><br>
+                Em caso de dúvidas, sugestões ou parcerias, entre em contato:<br><br>
+                👤 Alexandre Tolentino<br>
+                📧 E-mail: <a href="mailto:tolentinoalexandre534@gmail.com">tolentinoalexandre534@gmail.com</a><br>
+                📱 WhatsApp: <a href="https://wa.me/5563985009703" target="_blank">(63) 98500-9703</a>
+            </p>
+        </div>
+    </div>
+    <div class="container">
+        <img src="/static/uploads/testeon.png" alt="Logo TesteOn" style="display:block; margin: 0 auto 18px auto; max-width:260px; height:auto;">
+        <div style="text-align:center; font-size:1.25em; color:#1976d2; margin-bottom:18px; font-weight:500;">Sua avaliação conectada ao futuro.</div>
+        <div class="login-container">
+            <h2 style="text-align:center; color:#1976d2;">Login do Professor</h2>
+            
+            <div id="error-message" class="error-message"></div>
+            
+            <div class="form-login">
+                <button id="google-login-btn" class="btn-google-login" onclick="signInWithGoogle()">
+                    <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google">
+                    Entrar com Google
+                </button>
+            </div>
+            
+            <div id="loading" class="loading">
+                <p>Fazendo login...</p>
+            </div>
+        </div>
+        <div class="descricao-plataforma">
+            Plataforma para o professor criar simulados e aplicar virtualmente para seus estudantes.
+        </div>
+        <div class="rodape-institucional">
+            © 2025 TesteOn. Todos os direitos reservados
+        </div>
+        <div style="margin-top:18px; text-align:center;">
+            <b>Avaliações Online</b>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    
+    <script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyB01EzL2foQZZtuRYtzk0DWQOadUhORw1s",
+        authDomain: "testeon-1e5e4.firebaseapp.com",
+        projectId: "testeon-1e5e4",
+        storageBucket: "testeon-1e5e4.firebasestorage.app",
+        messagingSenderId: "1061176055557",
+        appId: "1:1061176055557:web:8cc3bb023aadca268a896c"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Função de login com Google
+    function signInWithGoogle() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
+        
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('google-login-btn').style.display = 'none';
+        document.getElementById('error-message').style.display = 'none';
+        
+        auth.signInWithPopup(provider)
+            .then((result) => {
+                const user = result.user;
+                return user.getIdToken();
+            })
+            .then((idToken) => {
+                // Enviar token para o backend
+                return fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        idToken: idToken
+                    })
+                });
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    // Redirecionar para o dashboard
+                    window.location.href = '/dashboard';
+                } else {
+                    throw new Error(data.error || 'Erro no login');
+                }
+            })
+            .catch((error) => {
+                console.error('Erro no login:', error);
+                document.getElementById('error-message').textContent = error.message || 'Erro ao fazer login. Tente novamente.';
+                document.getElementById('error-message').style.display = 'block';
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('google-login-btn').style.display = 'flex';
+            });
+    }
+
+    // Verificar se usuário já está logado
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            // Usuário já está logado, redirecionar para dashboard
+            window.location.href = '/dashboard';
+        }
+    });
+    </script>
+</body>
+</html> 

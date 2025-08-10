@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Login Simples</title>
+</head>
+<body>
+    <h1>Teste Login Simples</h1>
+    <p>Esta página testa se o backend está funcionando sem depender do Google Sign-In.</p>
+    
+    <button onclick="testBackend()">Testar Backend</button>
+    <div id="result"></div>
+
+    <script>
+    function testBackend() {
+        document.getElementById('result').innerHTML = 'Testando backend...';
+        
+        // Simular um token de teste
+        const testToken = 'test_token_123';
+        
+        fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                idToken: testToken
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('result').innerHTML = '✅ Backend funcionando! Erro esperado: ' + data.error;
+            } else {
+                document.getElementById('result').innerHTML = '✅ Backend funcionando! Resposta: ' + JSON.stringify(data);
+            }
+        })
+        .catch(error => {
+            document.getElementById('result').innerHTML = '❌ Erro no backend: ' + error.message;
+        });
+    }
+    </script>
+</body>
+</html> 

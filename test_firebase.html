@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Firebase</title>
+</head>
+<body>
+    <h1>Teste Firebase</h1>
+    <button onclick="testFirebase()">Testar Firebase</button>
+    <div id="result"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    
+    <script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyB01EzL2foQZZtuRYtzk0DWQOadUhORw1s",
+        authDomain: "testeon-1e5e4.firebaseapp.com",
+        projectId: "testeon-1e5e4",
+        storageBucket: "testeon-1e5e4.firebasestorage.app",
+        messagingSenderId: "1061176055557",
+        appId: "1:1061176055557:web:8cc3bb023aadca268a896c"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    function testFirebase() {
+        document.getElementById('result').innerHTML = 'Testando...';
+        
+        // Testar se o Firebase inicializou corretamente
+        try {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            document.getElementById('result').innerHTML = '✅ Firebase inicializado com sucesso!<br>Credenciais válidas.';
+        } catch (error) {
+            document.getElementById('result').innerHTML = '❌ Erro: ' + error.message;
+        }
+    }
+    </script>
+</body>
+</html> 
